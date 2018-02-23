@@ -25,7 +25,7 @@ def write_d3js(obj, path=None):
         f = open(path, 'w')
         json.dump(obj, f, cls=D3Encoder, sort_keys=False, indent=4, separators=(',', ': '))
     else:
-        json.dump(obj, cls=JsEncoder, sort_keys=False, indent=4, separators=(',', ': '))
+        json.dump(obj, cls=al.JsEncoder, sort_keys=False, indent=4, separators=(',', ': '))
 
 def read_d3js(path):
     f = open(path, 'r')

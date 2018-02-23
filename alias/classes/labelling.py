@@ -86,7 +86,7 @@ class Labelling(object):
             self.undefargs.remove(arg)
             self.inargs.add(arg)
         else:
-            raise LabellingException('Argument not present in labelling')
+            raise al.LabellingException('Argument not present in labelling')
 
     def label_out(self, arg):
         if arg in self.inargs:
@@ -101,7 +101,7 @@ class Labelling(object):
             self.undefargs.remove(arg)
             self.outargs.add(arg)
         else:
-            raise LabellingException('Argument not present in labelling')
+            raise al.LabellingException('Argument not present in labelling')
 
     def label_undec(self, arg):
         if arg in self.inargs:
@@ -116,7 +116,7 @@ class Labelling(object):
             self.undefargs.remove(arg)
             self.undecargs.add(arg)
         else:
-            raise LabellingException('Argument not present in labelling')
+            raise al.LabellingException('Argument not present in labelling')
 
     def label_undefined(self,arg):
         if arg in self.inargs:
@@ -131,7 +131,7 @@ class Labelling(object):
         elif arg in self.undefargs:
             return
         else:
-            raise LabellingException('Argument not present in labelling')
+            raise al.LabellingException('Argument not present in labelling')
 
     def lab2ext(self):
         return self.inargs
@@ -151,7 +151,7 @@ class Labelling(object):
     def is_complete(self):
         complete = True
         if self.undefargs:
-            raise LabellingException('Undefined arguments exist: ' )
+            raise al.LabellingException('Undefined arguments exist: ')
         for arg in (self.framework.get_arguments()):
             if arg in self.inargs:
                 if self.framework.get_arg_obj(arg).is_illegally_in(self):

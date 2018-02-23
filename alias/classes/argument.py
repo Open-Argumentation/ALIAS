@@ -1,3 +1,5 @@
+from pyparsing import basestring
+
 import alias as al
 
 class Argument(object):
@@ -49,7 +51,7 @@ class Argument(object):
     # Determines whether the argument is legally in within a given labelling
     def is_legally_in(self, labelling):
         if not (labelling.framework.argument_exists(self.name)):
-            raise ArgumentException("Argument does not exist in this framework/labelling.")
+            raise al.ArgumentException("Argument does not exist in this framework/labelling.")
         if self.name not in labelling.inargs:
             raise al.LabellingException("Argument is not labelled in.")
         allout = True
@@ -65,7 +67,7 @@ class Argument(object):
     # Determines whether the argument is legally out within a given labelling
     def is_legally_out(self, labelling):
         if not (labelling.framework.argument_exists(self.name)):
-            raise ArgumentException("Argument does not exist in this framework/labelling.")
+            raise al.ArgumentException("Argument does not exist in this framework/labelling.")
         if self.name not in labelling.outargs:
             raise al.LabellingException("Argument is not labelled out.")
 
@@ -80,7 +82,7 @@ class Argument(object):
     # Determines whether the argument is legally undecided within a given labelling
     def is_legally_undec(self, labelling):
         if not (labelling.framework.argument_exists(self.name)):
-            raise ArgumentException("Argument does not exist in this framework/labelling.")
+            raise al.ArgumentException("Argument does not exist in this framework/labelling.")
         if self.name not in labelling.undecargs:
             raise al.LabellingException("Argument is not labelled undecided.")
 
@@ -107,7 +109,7 @@ class Argument(object):
 
     def is_super_illegally_in(self, labelling):
         if not (labelling.framework.argument_exists(self.name)):
-            raise ArgumentException("Argument does not exist in this framework/labelling.")
+            raise al.ArgumentException("Argument does not exist in this framework/labelling.")
         if self.name not in labelling.inargs:
             raise al.LabellingException("Argument is not labelled in.")
 

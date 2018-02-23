@@ -19,7 +19,8 @@ def write_json(obj, path=None):
     	f = open(path, 'w')
     	json.dump(obj, f, cls=JsEncoder, sort_keys=False, indent=4, separators=(',', ': '))
     else:
-    	print json.dump(obj, cls=JsEncoder, sort_keys=False, indent=4, separators=(',', ': '))
+        print(json.dump(obj, cls=JsEncoder, sort_keys=False, indent=4, separators=(',', ': ')))
+
 
 def read_json(path):
     f = open(path, 'r')

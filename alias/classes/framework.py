@@ -1,3 +1,7 @@
+from functools import reduce
+
+from pyparsing import basestring
+
 import alias as al
 import sys
 from itertools import product
@@ -60,7 +64,7 @@ class ArgumentationFramework(object):
     def add_argument(self, args):
         def add(argumentname):
             if not isinstance(argumentname, basestring):
-                raise FrameworkException('Only string based argument name references can be added to a framework')
+                raise al.FrameworkException('Only string based argument name references can be added to a framework')
             else:
                 if self.__contains__(argumentname):
                     return
@@ -94,7 +98,7 @@ class ArgumentationFramework(object):
     def remove_argument(self, args):
         def remove(argumentname):
             if not isinstance(argumentname, basestring):
-                raise FrameworkException('Only string based argument name references can be removed from a framework')
+                raise al.FrameworkException('Only string based argument name references can be removed from a framework')
             else:
                 if not self.__contains__(argumentname):
                     return

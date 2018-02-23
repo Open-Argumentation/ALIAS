@@ -52,7 +52,7 @@ def read_tgf(path):
 
     try:
         parsed = graph.parseString(f)
-    except ParseException, e:
+    except ParseException as e:
         raise al.ParsingException(e)
 
     for arg in parsed[0]:

@@ -1,3 +1,5 @@
+from pyparsing import ParseException
+
 import alias as al
 import ntpath
 
@@ -58,7 +60,7 @@ def read_apx(path):
     
     try:
         parsed = apx.parseString(f)
-    except ParseException, e:
+    except ParseException as e:
         raise al.ParsingException(e)
 
     if 'arg' in parsed.keys():

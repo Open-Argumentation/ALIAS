@@ -44,7 +44,8 @@ def to_neo4j(af, dbaddress='localhost', port=None, u='', p=''):
     add_args(af.get_arguments())
     add_atts(af.get_attacks())
     tx.commit()
-    print 'Write to Neo4J Database Successful'
+    print('Write to Neo4J Database Successful')
+
 
 def from_neo4j(framework, dbaddress='localhost', port=None, u='', p=''):
     try:

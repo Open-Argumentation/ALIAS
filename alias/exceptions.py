@@ -1,5 +1,3 @@
-import alias as al
-
 class AliasException(Exception):
     """Root for alias exceptions.  Used to define further exceptions.  Never raised"""
     pass

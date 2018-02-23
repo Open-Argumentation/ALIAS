@@ -63,7 +63,7 @@ class DbWrapper(object):
             for arg in af:
                 session.add(af[arg])
             session.commit()
-            print 'Writing to SQLite database successful.'
+            print('Writing to SQLite database successful.')
 
     def from_sqlite(self, af, path):
         try:
@@ -95,7 +95,7 @@ class DbWrapper(object):
             for arg in af:
                 session.add(af[arg])
             session.commit()
-            print 'Writing to MySQL database successful.'
+            print('Writing to MySQL database successful.')
 
     def from_mysql(self, af=None, server='localhost:3306', db='test', u='', p=''):
         try:
@@ -112,7 +112,7 @@ class DbWrapper(object):
         session = DBSession()
         res = session.query(al.ArgumentationFramework).all()
         for f in res:
-            print f.id
+            print(f.id)
 
     def to_postgres(self):
         """

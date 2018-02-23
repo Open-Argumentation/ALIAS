@@ -71,7 +71,7 @@ def read_dot(path):
 
     try:
         parsed = dot.parseString(f)
-    except ParseException, e:
+    except ParseException as e:
         raise al.ParsingException(e)
 
     if parsed['gtype'] == 'graph':
