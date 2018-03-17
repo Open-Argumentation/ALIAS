@@ -169,15 +169,10 @@ class ArgumentationFramework(object):
         """
         # TODO Should remove all elements which are not attacked nor attacking any other element first
         my_return = []
-        zeros = numpy.where(self.matrix.to_dense == 0)
-        sets_to_check1 = defaultdict(list)
-        for k, v in zip(zeros[0], zeros[1]):
-            sets_to_check1[k].append(self.get_argument_from_mapping(v))
         sets_to_check = self.get_conflict_free_sets()
         for v in sets_to_check:
             if self.__is_stable_extension(v):
                 if set(v) not in set(my_return):
-                    # my_return[framework.counter].append(sets_to_check[v])
                     my_return.append(frozenset(v))
         return my_return
 
@@ -240,29 +235,55 @@ class ArgumentationFramework(object):
         test = set([])
         my_arguments = [x for x in self.arguments]
         for i in range(len(self.arguments)):
-            self.get_solution_from_row(self.matrix, i, my_arguments, test)
+            self.get_solution_from_row(i, my_arguments, test)
         return test
 
     def select_row(self, counter):
         return self.matrix.to_dense[counter, :]
 
-    def get_solution_from_row(self, matrix, row_number, arguments, solution, mapping=None):
-        if row_number < len(arguments):
-            row = matrix.to_dense[row_number, :]
-            if mapping is None:
-                ones = [arguments[v] for v in numpy.where(row == 1)[1]]
-            else:
-                mapping2 = {y: x for x, y in mapping.items()}
-                ones = [mapping2[v] for v in numpy.where(row == 1)[1]]
-            new_arguments = set(arguments) - set(ones)
-            attacks = [x for x in self.attacks if x[0] in new_arguments and x[1] in new_arguments]
-            if not ones:
-                row_number += 1
-            else:
-                row_number = 0
-            new_matrix = Matrix(list(new_arguments), attacks, False)
-            new_mapping = new_matrix.get_mappings()
-            self.get_solution_from_row(new_matrix, row_number, list(new_arguments), solution, new_mapping)
-        else:
-            solution.add(frozenset(arguments))
+    # def get_solution_from_row(self, matrix, row_number, arguments, solution, mapping=None):
+    #     if row_number < len(arguments):
+    #         row = matrix.to_dense[row_number, :]
+    #         if mapping is None:
+    #             ones = [arguments[v] for v in numpy.where(row == 1)[1]]
+    #         else:
+    #             mapping2 = {y: x for x, y in mapping.items()}
+    #             ones = [mapping2[v] for v in numpy.where(row == 1)[1]]
+    #         new_arguments = set(arguments) - set(ones)
+    #         attacks = [x for x in self.attacks if x[0] in new_arguments and x[1] in new_arguments]
+    #         if not ones:
+    #             row_number += 1
+    #         else:
+    #             row_number = 0
+    #         new_matrix = Matrix(list(new_arguments), attacks, False)
+    #         new_mapping = new_matrix.get_mappings()
+    #         self.get_solution_from_row(new_matrix, row_number, list(new_arguments), solution, new_mapping)
+    #     else:
+    #         solution.add(frozenset(arguments))
 
+    def get_solution_from_row(self, row_number, arguments, solution):
+        partial_solution = []
+        arg_to_check = self.get_argument_from_mapping(row_number)
+        self.test(frozenset(arguments), arg_to_check, partial_solution)
+        solution.add(frozenset(partial_solution))
+
+    def test(self, arguments, arg_to_check, partial_solution):
+        if len(arguments) > 0:
+            attacking = set(self.arguments[arg_to_check].attacking)
+            attacked_by = set(self.arguments[arg_to_check].attacked_by)
+            arguments = set(arguments)
+            arguments = arguments - attacking - attacked_by - set([arg_to_check])
+            partial_solution.append(arg_to_check)
+            if len(arguments) > 0:
+                next_argument = self.get_next_argument_to_check(arguments)
+                self.test(arguments, next_argument, partial_solution)
+        else:
+            return
+
+    def get_next_argument_to_check(self, arguments):
+        my_list = []
+        for arg in arguments:
+            my_list.append((arg, len(self.arguments[arg].attacking), len(self.arguments[arg].attacked_by)))
+        a = sorted(my_list, key=lambda x:(x[2], -x[1]))
+        next_arg = a[0]
+        return next_arg[0]

@@ -22,4 +22,4 @@ class ArgumentationFrameworkTests(TestCase):
         argumentation_framework = alias.read_tgf(framework)
         actual_stable = argumentation_framework.get_stable_extension()
         expected_stable = TestHelper.read_solution_from_file(solution)
-        self.assertEqual(expected_stable, actual_stable)
+        TestHelper.assertListsEqual(expected_stable, actual_stable)

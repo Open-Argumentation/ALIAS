@@ -1,24 +1,25 @@
 import time
 
+import alias
 from alias import ArgumentationFramework
 # stable extensions
 path = '/home/szczocik/Workspaces/Benchmark/B/'
 
 # filenames                                                             # arguments | attacks   | solutions from pyglaf
 filename1 = '1/massachusetts_blockislandferry_2015-11-13.gml.80.tgf'    # 2         | 1         | [a2]
-filename2 = '1/afinput_exp_cycles_indvary3_step4_batch_yyy03.tgf'       # 15        | 5         | [11,12,13,14,0,1,2,3,8,10]
+filename2 = '1/afinput_exp_cycles_indvary3_step4_batch_yyy03.tgf'       # 15        | 5         | 10 elements - [11,12,13,14,0,1,2,3,8,10]
 filename3 = '1/BA_40_80_4.tgf'                                          # 41        | 73        | [a32,a35,a37,a36,a17,a39,a38,a19,a20,a22,a21,a24,a25,a28,a27,a0,a4,a5,a7,a31,a30],[a32,a35,a36,a17,a39,a38,a19,a20,a22,a21,a24,a26,a25,a28,a27,a0,a4,a5,a7,a31,a30],[a32,a35,a36,a17,a39,a38,a19,a18,a20,a22,a21,a26,a25,a28,a27,a29,a0,a4,a5,a7,a31,a30],[a32,a35,a37,a36,a17,a39,a38,a19,a18,a20,a22,a21,a25,a28,a27,a29,a0,a4,a5,a7,a31,a30],[a32,a35,a37,a36,a17,a39,a38,a19,a18,a20,a22,a21,a25,a27,a29,a0,a4,a5,a6,a7,a31,a30],[a32,a35,a37,a36,a17,a39,a38,a19,a20,a22,a21,a24,a25,a27,a0,a4,a5,a6,a7,a31,a30],[a32,a35,a36,a17,a39,a38,a19,a20,a22,a21,a24,a26,a25,a27,a0,a4,a5,a6,a7,a31,a30],[a32,a35,a36,a17,a39,a38,a19,a18,a20,a22,a21,a26,a25,a27,a29,a0,a4,a5,a6,a7,a31,a30],[a32,a35,a12,a15,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a26,a25,a27,a29,a4,a5,a6,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a25,a27,a29,a4,a5,a6,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a25,a28,a27,a29,a4,a5,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a26,a25,a28,a27,a29,a4,a5,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a26,a25,a28,a27,a4,a5,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a26,a25,a27,a4,a5,a6,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a25,a27,a4,a5,a6,a7,a8,a9,a31,a30],[a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a25,a28,a27,a4,a5,a7,a8,a9,a31,a30],[a11,a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a25,a28,a27,a4,a5,a8,a9],[a11,a32,a35,a12,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a26,a25,a28,a27,a4,a5,a8,a9],[a11,a32,a35,a12,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a26,a25,a28,a27,a29,a4,a5,a8,a9],[a11,a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a25,a28,a27,a29,a4,a5,a8,a9],[a11,a32,a35,a37,a36,a17,a39,a38,a20,a22,a21,a25,a28,a27,a29,a0,a4,a5],[a11,a32,a35,a37,a36,a17,a39,a38,a20,a22,a21,a24,a25,a28,a27,a0,a4,a5],[a11,a32,a35,a36,a17,a39,a38,a20,a22,a21,a24,a26,a25,a28,a27,a0,a4,a5],[a11,a32,a35,a36,a17,a39,a38,a20,a22,a21,a26,a25,a28,a27,a29,a0,a4,a5],[a11,a32,a35,a36,a17,a39,a38,a20,a22,a21,a26,a25,a27,a29,a0,a4,a5,a6],[a11,a32,a35,a37,a36,a17,a39,a38,a20,a22,a21,a25,a27,a29,a0,a4,a5,a6],[a11,a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a25,a27,a29,a4,a5,a6,a8,a9],[a11,a32,a35,a12,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a26,a25,a27,a29,a4,a5,a6,a8,a9],[a11,a32,a35,a12,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a26,a25,a27,a4,a5,a6,a8,a9],[a11,a32,a35,a36,a17,a39,a38,a20,a22,a21,a24,a26,a25,a27,a0,a4,a5,a6],[a11,a32,a35,a37,a36,a17,a39,a38,a20,a22,a21,a24,a25,a27,a0,a4,a5,a6],[a11,a32,a35,a12,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a25,a27,a4,a5,a6,a8,a9],[a11,a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a25,a27,a4,a5,a6,a8,a9],[a11,a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a26,a25,a27,a4,a5,a6,a8,a9],[a11,a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a26,a25,a27,a29,a4,a5,a6,a8,a9],[a11,a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a25,a27,a29,a4,a5,a6,a8,a9],[a11,a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a25,a28,a27,a29,a4,a5,a8,a9],[a11,a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a25,a28,a27,a4,a5,a8,a9],[a11,a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a24,a23,a26,a25,a28,a27,a4,a5,a8,a9],[a11,a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a40,a20,a22,a21,a23,a26,a25,a28,a27,a29,a4,a5,a8,a9],[a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a26,a25,a28,a27,a29,a4,a5,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a25,a28,a27,a29,a4,a5,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a25,a27,a29,a4,a5,a6,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a19,a18,a40,a20,a22,a21,a23,a26,a25,a27,a29,a4,a5,a6,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a26,a25,a27,a4,a5,a6,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a26,a25,a28,a27,a4,a5,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a25,a28,a27,a4,a5,a7,a8,a9,a31,a30],[a13,a35,a12,a34,a15,a37,a14,a36,a17,a39,a38,a19,a40,a20,a22,a21,a24,a23,a25,a27,a4,a5,a6,a7,a8,a9,a31,a30],[a13,a35,a34,a37,a36,a17,a39,a38,a19,a20,a22,a21,a24,a25,a27,a0,a4,a5,a6,a7,a31,a30],[a13,a35,a34,a36,a17,a39,a38,a19,a20,a22,a21,a24,a26,a25,a27,a0,a4,a5,a6,a7,a31,a30],[a13,a35,a34,a36,a17,a39,a38,a19,a18,a20,a22,a21,a26,a25,a27,a29,a0,a4,a5,a6,a7,a31,a30],[a13,a35,a34,a37,a36,a17,a39,a38,a19,a18,a20,a22,a21,a25,a27,a29,a0,a4,a5,a6,a7,a31,a30],[a11,a13,a35,a34,a37,a36,a17,a39,a38,a20,a22,a21,a25,a27,a29,a0,a4,a5,a6],[a11,a13,a35,a34,a37,a36,a17,a39,a38,a20,a22,a21,a24,a25,a27,a0,a4,a5,a6],[a11,a13,a35,a34,a36,a17,a39,a38,a20,a22,a21,a24,a26,a25,a27,a0,a4,a5,a6],[a11,a13,a35,a34,a36,a17,a39,a38,a20,a22,a21,a26,a25,a27,a29,a0,a4,a5,a6],[a11,a13,a35,a34,a36,a17,a39,a38,a20,a22,a21,a26,a25,a28,a27,a29,a0,a4,a5],[a11,a13,a35,a34,a37,a36,a17,a39,a38,a20,a22,a21,a25,a28,a27,a29,a0,a4,a5],[a13,a35,a34,a37,a36,a17,a39,a38,a19,a18,a20,a22,a21,a25,a28,a27,a29,a0,a4,a5,a7,a31,a30],[a13,a35,a34,a36,a17,a39,a38,a19,a18,a20,a22,a21,a26,a25,a28,a27,a29,a0,a4,a5,a7,a31,a30],[a13,a35,a34,a36,a17,a39,a38,a19,a20,a22,a21,a24,a26,a25,a28,a27,a0,a4,a5,a7,a31,a30],[a11,a13,a35,a34,a36,a17,a39,a38,a20,a22,a21,a24,a26,a25,a28,a27,a0,a4,a5],[a11,a13,a35,a34,a37,a36,a17,a39,a38,a20,a22,a21,a24,a25,a28,a27,a0,a4,a5],[a13,a35,a34,a37,a36,a17,a39,a38,a19,a20,a22,a21,a24,a25,a28,a27,a0,a4,a5,a7,a31,a30]
-filename4 = '1/afinput_exp_cycles_indvary1_step8_batch_yyy08.tgf'       # 41        | 216       | [23,25,27,29,10,32,11,34,35,37,16,38,17,18,19,0,1,2,4,5,40,20,21]
-filename5 = '1/sembuster_60.tgf'                                        # 60        | 480       | [b20,c1,c2,c3,c4,c5,c6,c7,c8,c9,c11,c10,c13,c12,c15,c14,c17,c16,c19,c18]
+filename4 = '1/afinput_exp_cycles_indvary1_step8_batch_yyy08.tgf'       # 41        | 216       | 23 elements - [23,25,27,29,10,32,11,34,35,37,16,38,17,18,19,0,1,2,4,5,40,20,21]
+filename5 = '1/sembuster_60.tgf'                                        # 60        | 480       | 20 elements - [b20,c1,c2,c3,c4,c5,c6,c7,c8,c9,c11,c10,c13,c12,c15,c14,c17,c16,c19,c18]
 filename6 = '4/thecomet_20131025_1906.gml.20.tgf'                       # 168       | 233
-filename7 = '1/grd_156_3_6.tgf'
+filename7 = '1/grd_156_3_6.tgf'                                         # 156       | 409
 
 
 # full path
 file = path + filename5
 print('Reading file')
 start = time.time()
-af = ArgumentationFramework.read_tgf(file)
+af = alias.read_tgf(file)
 end = time.time()
 
 print('------------------------------------------------------------------')
@@ -33,7 +34,8 @@ start = time.time()
 gr = af.get_stable_extension()
 end = time.time()
 print(gr)
-print(len(gr))
+for i in gr:
+    print(len(i))
 print('Stable Extension created in ' + str(end - start) + ' seconds')
 print('------------------------------------------------------------------')
 

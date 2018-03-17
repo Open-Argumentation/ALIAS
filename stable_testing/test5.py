@@ -4,22 +4,19 @@
 # complete extension: empty set, {a}, {d}, {a,c}, {a,d}, {b,d}
 import time
 
-from ArgTest import ArgumentationFramework
+from alias import ArgumentationFramework
 
 af = ArgumentationFramework('complete')
 af.add_argument('a')
 af.add_argument('b')
 af.add_argument('c')
 af.add_argument('d')
-# af.add_attack('a', 'b')
-# af.add_attack('b', 'a')
-# af.add_attack('b', 'c')
-# af.add_attack('d', 'b')
-# af.add_attack('c', 'b')
+af.add_attack(('a', 'b'))
+af.add_attack(('b', 'c'))
+af.add_attack(('b', 'd'))
+af.add_attack(('c', 'd'))
+af.add_attack(('d', 'c'))
 
-af.add_attack('a', 'b')
-af.add_attack('b', 'c')
-af.add_attack('c', 'd')
 
 # af.draw_graph()
 print(af.get_stable_extension())
