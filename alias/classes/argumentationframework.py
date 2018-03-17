@@ -76,13 +76,15 @@ class ArgumentationFramework(object):
                 my_return.append(k)
         return my_return
 
-    def add_attack(self, attacker, attacked):
+    def add_attack(self, attack):
         """
         Method to add attack to argumentation framework
         :param attacker: argument that attacks 'attacked'
         :param attacked: argument attacked by 'attacker'
         :return:
         """
+        attacker = attack[0]
+        attacked = attack[1]
         if attacker not in self.arguments:
             self.add_argument(attacker)
         if attacked not in self.arguments:
@@ -264,40 +266,3 @@ class ArgumentationFramework(object):
         else:
             solution.add(frozenset(arguments))
 
-    @staticmethod
-    def read_tgf(path):
-        try:
-            from pyparsing import Word, alphanums, ZeroOrMore, White, Suppress, Group, ParseException, Optional
-        except ImportError:
-            raise ImportError("read_tgf requires pyparsing")
-
-        if not isinstance(path, str):
-            return
-
-        # Define tgf grammar
-        s = White(" ")
-        tag = Word(alphanums)
-        arg = Word(alphanums)
-        att = Group(arg + Suppress(s) + arg + Optional(Suppress(s) + tag))
-        nl = Suppress(White("\n"))
-
-        graph = Group(ZeroOrMore(arg + nl)) + Suppress("#") + nl + Group(ZeroOrMore(att + nl) + ZeroOrMore(att))
-
-        f = open(path, 'r')
-        f = f.read()
-
-        head, tail = ntpath.split(path)
-        framework = ArgumentationFramework(tail)
-
-        try:
-            parsed = graph.parseString(f)
-        except ParseException as e:
-            raise e
-
-        for arg in parsed[0]:
-            framework.add_argument(arg)
-
-        for att in parsed[1]:
-            framework.add_attack(att[0], att[1])
-
-        return framework

@@ -19,7 +19,7 @@ class ArgumentationFrameworkTests(TestCase):
         [prefix + 'stable3.tgf', prefix + 'stable3answer'],
     ])
     def stable_extension_test(self, framework, solution):
-        argumentation_framework = ArgumentationFramework.read_tgf(framework)
+        argumentation_framework = alias.read_tgf(framework)
         actual_stable = argumentation_framework.get_stable_extension()
         expected_stable = TestHelper.read_solution_from_file(solution)
         self.assertEqual(expected_stable, actual_stable)
