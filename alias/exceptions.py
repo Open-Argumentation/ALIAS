@@ -1,18 +1,18 @@
-class AliasException(Exception):
+class _AliasException(Exception):
     """Root for alias exceptions.  Used to define further exceptions.  Never raised"""
     pass
 
-class ArgumentException(AliasException):
+class _ArgumentException(_AliasException):
     pass
 
-class FrameworkException(AliasException):
+class _FrameworkException(_AliasException):
     pass
 
-class LabellingException(AliasException):
+class _LabellingException(_AliasException):
     pass
 
-class ParsingException(AliasException):
+class _ParsingException(_AliasException):
     pass
 
-class DbException(AliasException):
+class _DbException(_AliasException):
     pass

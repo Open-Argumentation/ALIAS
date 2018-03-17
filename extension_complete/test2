@@ -1,0 +1,20 @@
+Reading file rockland-county-department-of-public-transportation_20121220_2018.gml.20.tgf
+File read in 0.0032355785369873047 seconds
+Argumentation framework has 16 arguments
+Argumentation framework has 30 attacks
+Constructing complete extension
+Filename: /home/szczocik/Workspaces/alias/alias/semantics/extensions/extension_complete.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+     5     55.3 MiB     55.3 MiB   @profile
+     6                             def extension_complete(af):
+     7     55.3 MiB      0.0 MiB       comp = []
+     8    106.6 MiB     28.5 MiB       for s in af.generate_powerset():
+     9    106.6 MiB      0.0 MiB           if af.is_complete(s):
+    10    106.6 MiB      0.0 MiB               comp.append(s)
+    11     83.8 MiB    -22.7 MiB       return comp
+
+
+Complete extension done in 18.199149131774902 seconds
+[frozenset({'a16', 'a12'}), frozenset({'a9', 'a16', 'a8', 'a4', 'a12', 'a13', 'a1'}), frozenset({'a9', 'a16', 'a12', 'a13', 'a8'}), frozenset({'a9', 'a15', 'a16', 'a2', 'a8', 'a12', 'a13'})]

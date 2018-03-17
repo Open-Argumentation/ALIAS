@@ -1,5 +1,7 @@
 import alias as al
+from memory_profiler import profile
 
+@profile
 def extension_preferred(af):
     comp = al.extension_complete(af)
     pref = []

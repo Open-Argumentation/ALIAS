@@ -1,5 +1,5 @@
 import alias.classes
-from alias.classes import *
+from alias.classes import ArgumentationFramework
 
 import alias.inout
 from alias.inout import *
