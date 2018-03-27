@@ -71,3 +71,9 @@ class Matrix(object):
     def get_mappings(self):
         if self._arguments is not None:
             return self._arguments
+
+    def is_set_conflict_free(self, set_to_test):
+        matrix_to_test = self.get_sub_matrix(set_to_test, set_to_test)
+        if len(numpy.where(matrix_to_test == 1)[0]) > 0:
+            return False
+        return True

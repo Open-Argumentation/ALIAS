@@ -5,7 +5,7 @@ from Tests import TestHelper
 
 
 class ArgumentationFrameworkTests(TestCase):
-    prefix = './frameworks/'
+    prefix = './frameworks/stable/'
 
     def setUp(self):
         """METHOD_SETUP"""
@@ -17,6 +17,9 @@ class ArgumentationFrameworkTests(TestCase):
         [prefix + 'stable1.tgf', prefix + 'stable1answer'],
         [prefix + 'stable2.tgf', prefix + 'stable2answer'],
         [prefix + 'stable3.tgf', prefix + 'stable3answer'],
+        [prefix + 'stable4.tgf', prefix + 'stable4answer'],
+        [prefix + 'stable5.tgf', prefix + 'stable5answer'],
+        [prefix + 'stable6.tgf', prefix + 'stable6answer'],
     ])
     def stable_extension_test(self, framework, solution):
         argumentation_framework = alias.read_tgf(framework)

@@ -5,7 +5,7 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy
-from alias.classes import Matrix, Argument, Framework
+from alias.classes import Matrix, Argument, Framework, SymmetricArguments
 
 
 class ArgumentationFramework(object):
@@ -16,7 +16,7 @@ class ArgumentationFramework(object):
         self.arguments = OrderedDict()  # collection of all arguments in the framework
         self.attacks = []  # collection of all attacks in the framework
         self._matrix = None  # matrix representation of the framework
-        sys.setrecursionlimit(5000)
+        self._args_to_defence_sets = defaultdict(list)
 
     @property
     def matrix(self):
@@ -169,14 +169,14 @@ class ArgumentationFramework(object):
         """
         # TODO Should remove all elements which are not attacked nor attacking any other element first
         my_return = []
-        sets_to_check = self.get_conflict_free_sets()
-        for v in sets_to_check:
-            if self.__is_stable_extension(v):
-                if set(v) not in set(my_return):
-                    my_return.append(frozenset(v))
+        my_solutions = []
+        test = self.get_conflict_free_sets()
+        for v in test.solutions:
+            if self.is_stable_extension(v):
+                my_return.append(frozenset(v))
         return my_return
 
-    def __is_stable_extension(self, args):
+    def is_stable_extension(self, args):
         """
         Verifies if the provided argument(s) are stable extension using matrix
         :param framework: subframework of the Argumentation framework
@@ -184,106 +184,138 @@ class ArgumentationFramework(object):
         :return: True if the provided arguments are a stable extension, otherwise False
         """
         # This is commented out as using zero sub blocks from matrix
-        my_labels = [self.arguments[x].mapping for x in args]
-        x = numpy.where(self.matrix.to_dense == 1)
-        y = defaultdict(list)
-        for k, v in zip(x[0], x[1]):
-            y[k].append(v)
-        # TODO this throws error when there are no elements which are not attacking nor are attacked
-        not_attacked_or_attacking = None
-        my_submatrix = self.matrix.get_sub_matrix(my_labels, my_labels)
-        if len(numpy.where(my_submatrix == 1)[0]) > 0:
-            return False
-        # my_column_vertices = self.__get_submatrix(set(my_labels) - set(not_attacked_or_attacking), [x for x in
-        #                                                       set(range(len(self.arguments))).symmetric_difference(
-        #                                                           my_labels)])
-        my_column_vertices = self.matrix.get_sub_matrix(set(my_labels), [x for x in
-                                                                      set(range(len(
-                                                                          self.arguments))).symmetric_difference(
-                                                                          my_labels)])
-        if not_attacked_or_attacking is None:
+        if args:
+            my_labels = [self.arguments[x].mapping for x in args]
+            x = numpy.where(self.matrix.to_dense == 1)
+            y = defaultdict(list)
+            for k, v in zip(x[0], x[1]):
+                y[k].append(v)
+            my_submatrix = self.matrix.get_sub_matrix(my_labels, my_labels)
+            if len(numpy.where(my_submatrix == 1)[0]) > 0:
+                return False
+            my_column_vertices = self.matrix.get_sub_matrix(set(my_labels), [x for x in
+                                                                          set(range(len(
+                                                                              self.arguments))).symmetric_difference(
+                                                                              my_labels)])
             for row in my_column_vertices.sum(axis=0).tolist():
                 for v in row:
                     if v == 0:
                         return False
-            # if len(numpy.where(my_column_vertices == 0)[0]) > 0:
-            #     return False
-        else:
-            if len(set(numpy.where(my_column_vertices == 1)[0])) == my_column_vertices.shape[0]:
-                return True
-        return True
-
-    def get_conflict_free_from_set(self, arg_set):
-        my_labels = [self.arguments[x].mapping for x in arg_set]
-        counter = 0
-        attacks = [x for x in self.attacks if x[0] in arg_set and x[1] in arg_set]
-        reversed = []
-        for v in attacks:
-            if (v[1], v[0]) in attacks:
-                reversed.append(v)
-        to_be_removed = set(attacks) - set(reversed)
-        if not attacks:
-            counter += 1
-        else:
-            arg_set = list(set(arg_set) - set(attacks))
-            self.get_conflict_free_from_set(arg_set)
-        # for arg in arg_set:
-        #     arg_set = set(arg_set) - set(self.arguments[arg].attacking)
-        return list(arg_set)
+            return True
+        return False
 
     def get_conflict_free_sets(self):
-        test = set([])
-        my_arguments = [x for x in self.arguments]
-        for i in range(len(self.arguments)):
-            self.get_solution_from_row(i, my_arguments, test)
-        return test
+        my_return = ConflictFree(list(self.arguments.keys()))
+        for attack in self.attacks:
+            my_return.add(attack)
+        not_attacked_args = set()
+        for k, v in self.arguments.items():
+            if not v.attacking and not v.attacked_by:
+                not_attacked_args.add(k)
+        for v in my_return.solutions:
+            v = list(set(v) | not_attacked_args)
+        return my_return
 
-    def select_row(self, counter):
-        return self.matrix.to_dense[counter, :]
+    """
+    Those methods are based on dungAF implementation
+    """
+    def get_defence_set_around_argument_dungAF(self, arg):
+        copies_of_defence_sets = []
 
-    # def get_solution_from_row(self, matrix, row_number, arguments, solution, mapping=None):
-    #     if row_number < len(arguments):
-    #         row = matrix.to_dense[row_number, :]
-    #         if mapping is None:
-    #             ones = [arguments[v] for v in numpy.where(row == 1)[1]]
-    #         else:
-    #             mapping2 = {y: x for x, y in mapping.items()}
-    #             ones = [mapping2[v] for v in numpy.where(row == 1)[1]]
-    #         new_arguments = set(arguments) - set(ones)
-    #         attacks = [x for x in self.attacks if x[0] in new_arguments and x[1] in new_arguments]
-    #         if not ones:
-    #             row_number += 1
-    #         else:
-    #             row_number = 0
-    #         new_matrix = Matrix(list(new_arguments), attacks, False)
-    #         new_mapping = new_matrix.get_mappings()
-    #         self.get_solution_from_row(new_matrix, row_number, list(new_arguments), solution, new_mapping)
-    #     else:
-    #         solution.add(frozenset(arguments))
+        if arg not in self.arguments:
+            return None;
+        elif arg not in self._args_to_defence_sets:
+            self._args_to_defence_sets[arg] = self.get_defence_set_around_argument_helper_dungAF(arg, [], [])
 
-    def get_solution_from_row(self, row_number, arguments, solution):
-        partial_solution = []
-        arg_to_check = self.get_argument_from_mapping(row_number)
-        self.test(frozenset(arguments), arg_to_check, partial_solution)
-        solution.add(frozenset(partial_solution))
 
-    def test(self, arguments, arg_to_check, partial_solution):
-        if len(arguments) > 0:
-            attacking = set(self.arguments[arg_to_check].attacking)
-            attacked_by = set(self.arguments[arg_to_check].attacked_by)
-            arguments = set(arguments)
-            arguments = arguments - attacking - attacked_by - set([arg_to_check])
-            partial_solution.append(arg_to_check)
-            if len(arguments) > 0:
-                next_argument = self.get_next_argument_to_check(arguments)
-                self.test(arguments, next_argument, partial_solution)
+    def get_defence_set_around_argument_helper_dungAF(self, current_arg, args_list=[], candidate_solution=[]):
+        accumulated_candidate_solutions = []
+        relevant_candidate_solutions = []
+        self_defensive_candidate_solutions = []
+
+        on_pro_arg = len(args_list) % 2 == 0
+
+        if on_pro_arg and current_arg in self.arguments[current_arg].attacking:
+            return None
+
+        args_list.append(current_arg)
+
+        if on_pro_arg:
+            if candidate_solution:
+                for v in candidate_solution:
+                    v.append(current_arg)
+            else:
+                candidate_solution.append([current_arg])
         else:
-            return
+            accumulated_candidate_solutions = []
 
-    def get_next_argument_to_check(self, arguments):
-        my_list = []
-        for arg in arguments:
-            my_list.append((arg, len(self.arguments[arg].attacking), len(self.arguments[arg].attacked_by)))
-        a = sorted(my_list, key=lambda x:(x[2], -x[1]))
-        next_arg = a[0]
-        return next_arg[0]
+        if candidate_solution and self.arguments[current_arg].attacked_by:
+            for attacker in self.arguments[current_arg].attacked_by:
+                relevant_candidate_solutions = []
+                if on_pro_arg:
+                    self_defensive_candidate_solutions = []
+                for solution in candidate_solution:
+                    if on_pro_arg:
+                        t = self.arguments[attacker].attacked_by
+                        # print('------------------')
+                        # print(set(t))
+                        # print(solution)
+                        # print(set(t).intersection(set(solution)))
+
+                        if t and len(set(t).intersection(set(solution))) == 0:
+                            relevant_candidate_solutions.append(solution)
+                        else:
+                            self_defensive_candidate_solutions.append(solution)
+                    else:
+                        to_test = []
+                        for v in solution:
+                            to_test.append(self.arguments[v].mapping)
+                        to_test.append(self.arguments[attacker].mapping)
+                        if self.matrix.is_set_conflict_free(to_test):
+                            relevant_candidate_solutions.append(solution)
+
+                candidate_solution = self.get_defence_set_around_argument_helper_dungAF(attacker, args_list, relevant_candidate_solutions)
+
+                if on_pro_arg:
+                    for v in self_defensive_candidate_solutions:
+                        candidate_solution.append(v)
+                    # remove all non-minimal members of can-sols
+                    if not candidate_solution:
+                        return
+                else:
+                    for v in candidate_solution:
+                        accumulated_candidate_solutions.append(v)
+                    # remove all non-minimal members of accumulated_candidate_solutions
+
+        if not on_pro_arg:
+            candidate_solution = accumulated_candidate_solutions
+        args_list.remove(current_arg)
+        return candidate_solution
+
+    def get_attacks_of_set(self, arg_set):
+        return [x[1] for x in self.attacks if x[0] in arg_set]
+
+"""
+Those objects are used to create maximal conflict free sets
+"""
+class ConflictFree(object):
+    def __init__(self, arguments):
+        self.solutions = set()
+        self.solutions.add(frozenset(arguments))
+
+    def add(self, attack):
+        temp = []
+        to_be_removed = []
+        for v in self.solutions:
+            if attack[0] in v and attack[1] in v:
+                with_attacker = list(set(list(v)) - set([attack[1]]))
+                with_attacked = list(set(list(v)) - set([attack[0]]))
+                to_be_removed.append(v)
+                temp.append(with_attacked)
+                temp.append(with_attacker)
+        if temp:
+            for v in temp:
+                self.solutions.add(frozenset(v))
+        if to_be_removed:
+            for v in to_be_removed:
+                self.solutions.remove(frozenset(v))
