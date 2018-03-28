@@ -5,8 +5,9 @@ from Tests import TestHelper
 
 
 class ArgumentationFrameworkTests(TestCase):
-    prefix = './frameworks/stable/'
-
+    stable_prefix = './frameworks/stable/'
+    complete_prefix = './frameworks/complete/'
+    
     def setUp(self):
         """METHOD_SETUP"""
 
@@ -14,15 +15,29 @@ class ArgumentationFrameworkTests(TestCase):
         """METHOD_TEARDOWN"""
 
     @parameterized.expand([
-        [prefix + 'stable1.tgf', prefix + 'stable1answer'],
-        [prefix + 'stable2.tgf', prefix + 'stable2answer'],
-        [prefix + 'stable3.tgf', prefix + 'stable3answer'],
-        [prefix + 'stable4.tgf', prefix + 'stable4answer'],
-        [prefix + 'stable5.tgf', prefix + 'stable5answer'],
-        [prefix + 'stable6.tgf', prefix + 'stable6answer'],
+        [stable_prefix + 'stable1.tgf', stable_prefix + 'stable1answer'],
+        [stable_prefix + 'stable2.tgf', stable_prefix + 'stable2answer'],
+        [stable_prefix + 'stable3.tgf', stable_prefix + 'stable3answer'],
+        [stable_prefix + 'stable4.tgf', stable_prefix + 'stable4answer'],
+        [stable_prefix + 'stable5.tgf', stable_prefix + 'stable5answer'],
+        [stable_prefix + 'stable6.tgf', stable_prefix + 'stable6answer'],
     ])
     def stable_extension_test(self, framework, solution):
         argumentation_framework = alias.read_tgf(framework)
         actual_stable = argumentation_framework.get_stable_extension()
         expected_stable = TestHelper.read_solution_from_file(solution)
         TestHelper.assertListsEqual(expected_stable, actual_stable)
+
+    @parameterized.expand([
+        [complete_prefix + 'complete1.tgf', complete_prefix + 'complete1answer'],
+        [complete_prefix + 'complete2.tgf', complete_prefix + 'complete2answer'],
+        [complete_prefix + 'complete3.tgf', complete_prefix + 'complete3answer'],
+        [complete_prefix + 'complete4.tgf', complete_prefix + 'complete4answer'],
+        [complete_prefix + 'complete5.tgf', complete_prefix + 'complete5answer'],
+        [complete_prefix + 'complete6.tgf', complete_prefix + 'complete6answer'],
+    ])
+    def complete_extension_test(self, framweork, solution):
+        argumentation_framework = alias.read_tgf(framweork)
+        actual_complete = argumentation_framework.get_complete_extension()
+        expected_complete = TestHelper.read_solution_from_file(solution)
+        TestHelper.assertListsEqual(expected_complete, actual_complete)

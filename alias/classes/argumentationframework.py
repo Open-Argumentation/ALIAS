@@ -1,10 +1,15 @@
 import ntpath
 from collections import OrderedDict, defaultdict
+from operator import itemgetter
+
+from memory_profiler import profile
 from scipy import sparse
 import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy
+from sortedcontainers import SortedList
+
 from alias.classes import Matrix, Argument, Framework, SymmetricArguments
 
 
@@ -169,11 +174,10 @@ class ArgumentationFramework(object):
         """
         # TODO Should remove all elements which are not attacked nor attacking any other element first
         my_return = []
-        my_solutions = []
         test = self.get_conflict_free_sets()
         for v in test.solutions:
             if self.is_stable_extension(v):
-                my_return.append(frozenset(v))
+                my_return.append(set(v))
         return my_return
 
     def is_stable_extension(self, args):
@@ -186,17 +190,11 @@ class ArgumentationFramework(object):
         # This is commented out as using zero sub blocks from matrix
         if args:
             my_labels = [self.arguments[x].mapping for x in args]
-            x = numpy.where(self.matrix.to_dense == 1)
-            y = defaultdict(list)
-            for k, v in zip(x[0], x[1]):
-                y[k].append(v)
-            my_submatrix = self.matrix.get_sub_matrix(my_labels, my_labels)
-            if len(numpy.where(my_submatrix == 1)[0]) > 0:
-                return False
             my_column_vertices = self.matrix.get_sub_matrix(set(my_labels), [x for x in
                                                                           set(range(len(
                                                                               self.arguments))).symmetric_difference(
                                                                               my_labels)])
+            a = my_column_vertices.sum(axis=0).tolist()
             for row in my_column_vertices.sum(axis=0).tolist():
                 for v in row:
                     if v == 0:
@@ -204,28 +202,101 @@ class ArgumentationFramework(object):
             return True
         return False
 
+    # @profile
     def get_conflict_free_sets(self):
+        """
+        Method to generate maximal conflict free sets of argumentation framework
+        :return:
+        """
+        done_attacks = []
         my_return = ConflictFree(list(self.arguments.keys()))
+        self.attacks.sort(key=itemgetter(0))
         for attack in self.attacks:
-            my_return.add(attack)
-        not_attacked_args = set()
-        for k, v in self.arguments.items():
-            if not v.attacking and not v.attacked_by:
-                not_attacked_args.add(k)
-        for v in my_return.solutions:
-            v = list(set(v) | not_attacked_args)
+            already_done = False
+            if [attack[1], attack[0]] in done_attacks:
+                already_done = True
+            if not already_done:
+                my_return.add(attack)
+                done_attacks.append(list(attack))
         return my_return
+
+    def get_complete_extension(self):
+        """
+        Method to geterate complete extension for the argumentation framework
+        :return: list of sets of complete extension
+        """
+        my_return = []
+        for v in self.__get_maximal_admissible_sets():
+            if self.__is_complete_extension(v):
+                my_return.append(set(v))
+        t = self.__get_minimal_admissible_sets()
+        for v in self.__get_minimal_admissible_sets():
+            if self.__is_complete_extension(v):
+                my_return.append(set(v))
+        return my_return
+
+    def __is_complete_extension(self, args):
+        """
+        Method to check if the given set is a complete extension, based on the properties of the matrix
+        :param args: list of arguments to be checked
+        :return: True if set is a complete extension
+        """
+        if args:
+            arguments_to_check = [self.arguments[x].mapping for x in self.arguments if x not in args and x not in self.get_attacks_of_set(args)]
+            if not arguments_to_check:
+                return True
+            else:
+                my_column_vertices = self.matrix.get_sub_matrix(arguments_to_check, arguments_to_check)
+                for row in my_column_vertices.sum(axis=0).tolist():
+                    for v in row:
+                        if v == 0:
+                            return False
+                return True
+        return False
+
+    def __build_admissible_sets_from_minimal_sets(self, minimal_admissible_sets):
+        for v in minimal_admissible_sets:
+            print(v)
 
     """
     Those methods are based on dungAF implementation
     """
-    def get_defence_set_around_argument_dungAF(self, arg):
-        copies_of_defence_sets = []
+    def __get_minimal_admissible_sets(self):
+        defence_sets = []
+        for arg in self.arguments:
+            if arg not in self.arguments:
+                return None;
+            elif arg not in self._args_to_defence_sets:
+                self.__get_admissible_set_from_argument(arg, defence_sets, [])
+        return defence_sets
 
-        if arg not in self.arguments:
-            return None;
-        elif arg not in self._args_to_defence_sets:
-            self._args_to_defence_sets[arg] = self.get_defence_set_around_argument_helper_dungAF(arg, [], [])
+    def __get_admissible_set_from_argument(self, arg, defence_sets, checked_arguments=[], is_in=True):
+        checked_arguments.append(arg)
+
+        if self.arguments[arg].attacked_by:
+            if set(self.arguments[arg].attacking).intersection(set(self.arguments[arg].attacked_by)) == set(self.arguments[arg].attacked_by) and is_in:
+                defence_sets.append([arg])
+
+            for attacker in self.arguments[arg].attacked_by:
+                if attacker not in self.arguments[arg].attacking:
+                    possible_solutions = defence_sets
+                    if is_in:
+                        self.__get_admissible_set_from_argument(attacker, possible_solutions, checked_arguments, False)
+                    else:
+                        self.__get_admissible_set_from_argument(attacker, possible_solutions, checked_arguments, True)
+        elif is_in:
+            defence_sets.append([arg])
+            return
+
+    def __get_maximal_admissible_sets(self):
+        """
+        Return list of the maximal admissible sets from the argumentation framework
+        :return:
+        """
+        maximal_conflict_free = self.get_conflict_free_sets()
+        for v in maximal_conflict_free.solutions:
+            if set(self.get_attackers_of_set(v)).issubset(self.get_attacks_of_set(v)):
+                yield v
 
 
     def get_defence_set_around_argument_helper_dungAF(self, current_arg, args_list=[], candidate_solution=[]):
@@ -249,8 +320,8 @@ class ArgumentationFramework(object):
         else:
             accumulated_candidate_solutions = []
 
-        if candidate_solution and self.arguments[current_arg].attacked_by:
-            for attacker in self.arguments[current_arg].attacked_by:
+        for attacker in self.arguments[current_arg].attacked_by:
+            if attacker not in args_list:
                 relevant_candidate_solutions = []
                 if on_pro_arg:
                     self_defensive_candidate_solutions = []
@@ -288,12 +359,29 @@ class ArgumentationFramework(object):
                     # remove all non-minimal members of accumulated_candidate_solutions
 
         if not on_pro_arg:
-            candidate_solution = accumulated_candidate_solutions
+            if self.arguments[current_arg].attacked_by:
+                candidate_solution = accumulated_candidate_solutions
+            else:
+                candidate_solution = []
+
         args_list.remove(current_arg)
         return candidate_solution
 
     def get_attacks_of_set(self, arg_set):
+        """
+        Generates the list of all attacks of the given set
+        :param arg_set:
+        :return:
+        """
         return [x[1] for x in self.attacks if x[0] in arg_set]
+
+    def get_attackers_of_set(self, arg_set):
+        """
+        Generates the list of all attackers of the given set
+        :param arg_set:
+        :return:
+        """
+        return [x[0] for x in self.attacks if x[1] in arg_set]
 
 """
 Those objects are used to create maximal conflict free sets
@@ -304,18 +392,8 @@ class ConflictFree(object):
         self.solutions.add(frozenset(arguments))
 
     def add(self, attack):
-        temp = []
-        to_be_removed = []
-        for v in self.solutions:
-            if attack[0] in v and attack[1] in v:
-                with_attacker = list(set(list(v)) - set([attack[1]]))
-                with_attacked = list(set(list(v)) - set([attack[0]]))
-                to_be_removed.append(v)
-                temp.append(with_attacked)
-                temp.append(with_attacker)
-        if temp:
-            for v in temp:
-                self.solutions.add(frozenset(v))
-        if to_be_removed:
-            for v in to_be_removed:
-                self.solutions.remove(frozenset(v))
+        elements = [x for x in self.solutions if set(list(attack)) < x or set(list(attack)) == x]
+        for v in elements:
+            self.solutions.remove(v)
+            self.solutions.add(frozenset(set(list(v)) - set([attack[1]])))
+            self.solutions.add(frozenset(set(list(v)) - set([attack[0]])))
