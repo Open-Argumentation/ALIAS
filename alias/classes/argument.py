@@ -11,3 +11,4 @@ class Argument(object):
 
     def add_attacker(self, attacker):
         self.attacked_by.append(attacker)
+

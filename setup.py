@@ -20,7 +20,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python :: 2.7'
     ],
-    install_requires=[''],
+    install_requires=['', 'tables'],
     packages=find_packages(exclude=['docs', 'tests*']),
     extras_require={
         'inout': ['pyparsing', 'networkx'],

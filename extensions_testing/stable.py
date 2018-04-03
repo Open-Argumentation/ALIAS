@@ -13,10 +13,10 @@ filename4 = '1/afinput_exp_cycles_indvary1_step8_batch_yyy08.tgf'       # 41    
 filename5 = '1/sembuster_60.tgf'                                        # 60        | 460       | 20 elements - [b20,c1,c2,c3,c4,c5,c6,c7,c8,c9,c11,c10,c13,c12,c15,c14,c17,c16,c19,c18]
 filename6 = '4/thecomet_20131025_1906.gml.20.tgf'                       # 168       | 233       | ridiculously large
 filename7 = '1/grd_156_3_6.tgf'                                         # 156       | 409       | [a76,a120,a126,a127,a128,a122,a83,a125,a88,a87,a110,a90,a116,a111,a113,a96,a114,a98,a141,a142,a12,a143,a148,a149,a144,a145,a147,a131,a132,a138,a139,a133,a135,a136,a37,a152,a46,a153,a154,a47,a150,a155,a53,a56,a109,a104,a105,a107,a64,a102,a66,a65,a68,a2,a5,a8,a9,a71,a70]
-
+filename8 = '1/stb_199_128.tgf'
 
 # full path
-file = path + filename3
+file = path + filename2
 print('Reading file')
 start = time.time()
 af = alias.read_tgf(file)

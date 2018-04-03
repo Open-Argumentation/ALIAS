@@ -1,7 +1,11 @@
 import ntpath
 from collections import OrderedDict, defaultdict
 from operator import itemgetter
+from timeit import timeit
 
+import time
+
+from tables import *
 from memory_profiler import profile
 from scipy import sparse
 import sys
@@ -10,8 +14,7 @@ import matplotlib.pyplot as plt
 import numpy
 from sortedcontainers import SortedList
 
-from alias.classes import Matrix, Argument, Framework, SymmetricArguments
-
+from alias.classes import Matrix, Argument, Store, Framework, SymmetricArguments, Tree
 
 class ArgumentationFramework(object):
 
@@ -22,6 +25,7 @@ class ArgumentationFramework(object):
         self.attacks = []  # collection of all attacks in the framework
         self._matrix = None  # matrix representation of the framework
         self._args_to_defence_sets = defaultdict(list)
+        # self._store = Store()
 
     @property
     def matrix(self):
@@ -57,6 +61,8 @@ class ArgumentationFramework(object):
         if arg not in self.arguments:
             counter = len(self.arguments)
             self.arguments[arg] = Argument(arg, counter)
+            # self._store.add_argument(self.arguments[arg])
+
 
     def get_argument_from_mapping(self, mapping):
         """
@@ -94,6 +100,9 @@ class ArgumentationFramework(object):
             self.add_argument(attacker)
         if attacked not in self.arguments:
             self.add_argument(attacked)
+        # if not self.attacks:
+            # self._store.setup_conflict_free_sets()
+
         self.attacks.append((attacker, attacked))
         self.arguments[attacker].attacking.append(attacked)
         self.arguments[attacked].attacked_by.append(attacker)
@@ -174,8 +183,23 @@ class ArgumentationFramework(object):
         """
         # TODO Should remove all elements which are not attacked nor attacking any other element first
         my_return = []
-        test = self.get_conflict_free_sets()
-        for v in test.solutions:
+        """ this is with sets """
+        # test = self.get_conflict_free_sets()
+
+        """ this is with pytables """
+        # self.attacks.sort(key=itemgetter(0, 1))
+        # for att in self.attacks:
+        #     self._store.add_attack(att)
+        # t = self._store.get_conflict_free_args()
+
+        """ this is with tree """
+        tree = Tree()
+        self.attacks.sort(key=itemgetter(0, 1))
+        for att in self.attacks:
+            tree.add_node(att)
+        tree.show()
+        t = tree.get_combinations(self.arguments)
+        for v in t:
             if self.is_stable_extension(v):
                 my_return.append(set(v))
         return my_return
@@ -187,20 +211,23 @@ class ArgumentationFramework(object):
         :param args: list of arguments to be checked
         :return: True if the provided arguments are a stable extension, otherwise False
         """
-        # This is commented out as using zero sub blocks from matrix
-        if args:
-            my_labels = [self.arguments[x].mapping for x in args]
-            my_column_vertices = self.matrix.get_sub_matrix(set(my_labels), [x for x in
-                                                                          set(range(len(
-                                                                              self.arguments))).symmetric_difference(
-                                                                              my_labels)])
-            a = my_column_vertices.sum(axis=0).tolist()
-            for row in my_column_vertices.sum(axis=0).tolist():
-                for v in row:
-                    if v == 0:
-                        return False
+        # remaining_sets = [x for x in self.arguments if x not in args]
+        if set(self.get_attacks_of_set(args)) == (set(self.arguments).symmetric_difference(set(args))):
             return True
         return False
+        # if args:
+        #     my_labels = [self.arguments[x].mapping for x in args]
+        #     my_column_vertices = self.matrix.get_sub_matrix(set(my_labels), [x for x in
+        #                                                                   set(range(len(
+        #                                                                       self.arguments))).symmetric_difference(
+        #                                                                       my_labels)])
+        #     a = my_column_vertices.sum(axis=0).tolist()
+        #     for row in my_column_vertices.sum(axis=0).tolist():
+        #         for v in row:
+        #             if v == 0:
+        #                 return False
+        #     return True
+        # return False
 
     # @profile
     def get_conflict_free_sets(self):
@@ -210,7 +237,7 @@ class ArgumentationFramework(object):
         """
         done_attacks = []
         my_return = ConflictFree(list(self.arguments.keys()))
-        self.attacks.sort(key=itemgetter(0))
+        self.attacks.sort(key=itemgetter(0, 1))
         for attack in self.attacks:
             already_done = False
             if [attack[1], attack[0]] in done_attacks:
@@ -219,23 +246,22 @@ class ArgumentationFramework(object):
                 my_return.add(attack)
                 done_attacks.append(list(attack))
         return my_return
-
+    
     def get_complete_extension(self):
+        return []
+
+    def get_preferred_extension(self):
         """
         Method to geterate complete extension for the argumentation framework
         :return: list of sets of complete extension
         """
         my_return = []
         for v in self.__get_maximal_admissible_sets():
-            if self.__is_complete_extension(v):
-                my_return.append(set(v))
-        t = self.__get_minimal_admissible_sets()
-        for v in self.__get_minimal_admissible_sets():
-            if self.__is_complete_extension(v):
+            if self.__is_preferred_extension(v):
                 my_return.append(set(v))
         return my_return
 
-    def __is_complete_extension(self, args):
+    def __is_preferred_extension(self, args):
         """
         Method to check if the given set is a complete extension, based on the properties of the matrix
         :param args: list of arguments to be checked
@@ -262,12 +288,13 @@ class ArgumentationFramework(object):
     Those methods are based on dungAF implementation
     """
     def __get_minimal_admissible_sets(self):
+        sys.setrecursionlimit(10000)
         defence_sets = []
         for arg in self.arguments:
-            if arg not in self.arguments:
-                return None;
-            elif arg not in self._args_to_defence_sets:
-                self.__get_admissible_set_from_argument(arg, defence_sets, [])
+            temp = self.get_defence_set_around_argument_helper_dungAF(arg, [], [])
+            if temp:
+                for v in temp:
+                    defence_sets.append(v)
         return defence_sets
 
     def __get_admissible_set_from_argument(self, arg, defence_sets, checked_arguments=[], is_in=True):
@@ -293,8 +320,12 @@ class ArgumentationFramework(object):
         Return list of the maximal admissible sets from the argumentation framework
         :return:
         """
-        maximal_conflict_free = self.get_conflict_free_sets()
-        for v in maximal_conflict_free.solutions:
+        # maximal_conflict_free = self.get_conflict_free_sets()
+        self.attacks.sort(key=itemgetter(0, 1))
+        for att in self.attacks:
+            self._store.add_attack(att)
+        maximal_conflict_free = self._store.get_conflict_free_args()
+        for v in maximal_conflict_free:
             if set(self.get_attackers_of_set(v)).issubset(self.get_attacks_of_set(v)):
                 yield v
 
@@ -325,25 +356,26 @@ class ArgumentationFramework(object):
                 relevant_candidate_solutions = []
                 if on_pro_arg:
                     self_defensive_candidate_solutions = []
-                for solution in candidate_solution:
-                    if on_pro_arg:
-                        t = self.arguments[attacker].attacked_by
-                        # print('------------------')
-                        # print(set(t))
-                        # print(solution)
-                        # print(set(t).intersection(set(solution)))
+                if candidate_solution:
+                    for solution in candidate_solution:
+                        if on_pro_arg:
+                            t = self.arguments[attacker].attacked_by
+                            # print('------------------')
+                            # print(set(t))
+                            # print(solution)
+                            # print(set(t).intersection(set(solution)))
 
-                        if t and len(set(t).intersection(set(solution))) == 0:
-                            relevant_candidate_solutions.append(solution)
+                            if t and len(set(t).intersection(set(solution))) == 0:
+                                relevant_candidate_solutions.append(solution)
+                            else:
+                                self_defensive_candidate_solutions.append(solution)
                         else:
-                            self_defensive_candidate_solutions.append(solution)
-                    else:
-                        to_test = []
-                        for v in solution:
-                            to_test.append(self.arguments[v].mapping)
-                        to_test.append(self.arguments[attacker].mapping)
-                        if self.matrix.is_set_conflict_free(to_test):
-                            relevant_candidate_solutions.append(solution)
+                            to_test = []
+                            for v in solution:
+                                to_test.append(self.arguments[v].mapping)
+                            to_test.append(self.arguments[attacker].mapping)
+                            if self.matrix.is_set_conflict_free(to_test):
+                                relevant_candidate_solutions.append(solution)
 
                 candidate_solution = self.get_defence_set_around_argument_helper_dungAF(attacker, args_list, relevant_candidate_solutions)
 
@@ -354,8 +386,9 @@ class ArgumentationFramework(object):
                     if not candidate_solution:
                         return
                 else:
-                    for v in candidate_solution:
-                        accumulated_candidate_solutions.append(v)
+                    if candidate_solution:
+                        for v in candidate_solution:
+                            accumulated_candidate_solutions.append(v)
                     # remove all non-minimal members of accumulated_candidate_solutions
 
         if not on_pro_arg:
@@ -392,8 +425,18 @@ class ConflictFree(object):
         self.solutions.add(frozenset(arguments))
 
     def add(self, attack):
-        elements = [x for x in self.solutions if set(list(attack)) < x or set(list(attack)) == x]
-        for v in elements:
-            self.solutions.remove(v)
-            self.solutions.add(frozenset(set(list(v)) - set([attack[1]])))
-            self.solutions.add(frozenset(set(list(v)) - set([attack[0]])))
+        to_be_removed = set()
+        new_items = set()
+        if attack[0] == attack[1]:
+            for v in self.solutions:
+                frozenset(set(v) - set([attack[0]]))
+        else:
+            for v in self.solutions:
+                if set(list(attack)) < v or set(list(attack)) == v:
+                    to_be_removed.add(frozenset(v))
+                    new_items.add(frozenset(set(list(v)) - set([attack[1]])))
+                    new_items.add(frozenset(set(list(v)) - set([attack[0]])))
+            for v in to_be_removed:
+                self.solutions.remove(v)
+            for v in new_items:
+                self.solutions.add(v)
