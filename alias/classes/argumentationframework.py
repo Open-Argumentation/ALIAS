@@ -25,7 +25,7 @@ class ArgumentationFramework(object):
         self.attacks = []  # collection of all attacks in the framework
         self._matrix = None  # matrix representation of the framework
         self._args_to_defence_sets = defaultdict(list)
-        # self._store = Store()
+        self._store = Store()
 
     @property
     def matrix(self):
@@ -61,7 +61,7 @@ class ArgumentationFramework(object):
         if arg not in self.arguments:
             counter = len(self.arguments)
             self.arguments[arg] = Argument(arg, counter)
-            # self._store.add_argument(self.arguments[arg])
+            self._store.add_argument(self.arguments[arg])
 
 
     def get_argument_from_mapping(self, mapping):
@@ -100,12 +100,13 @@ class ArgumentationFramework(object):
             self.add_argument(attacker)
         if attacked not in self.arguments:
             self.add_argument(attacked)
-        # if not self.attacks:
-            # self._store.setup_conflict_free_sets()
+        if not self.attacks:
+            self._store.setup_conflict_free_sets()
 
         self.attacks.append((attacker, attacked))
         self.arguments[attacker].attacking.append(attacked)
         self.arguments[attacked].attacked_by.append(attacker)
+        self._store.add_attack((attacker, attacked))
 
     def draw_graph(self):
         """
@@ -187,18 +188,18 @@ class ArgumentationFramework(object):
         # test = self.get_conflict_free_sets()
 
         """ this is with pytables """
-        # self.attacks.sort(key=itemgetter(0, 1))
-        # for att in self.attacks:
-        #     self._store.add_attack(att)
-        # t = self._store.get_conflict_free_args()
-
-        """ this is with tree """
-        tree = Tree()
         self.attacks.sort(key=itemgetter(0, 1))
         for att in self.attacks:
-            tree.add_node(att)
-        tree.show()
-        t = tree.get_combinations(self.arguments)
+            self._store.add_attack(att)
+        t = self._store.get_conflict_free_args()
+
+        """ this is with tree """
+        # tree = Tree()
+        # self.attacks.sort(key=itemgetter(0, 1))
+        # for att in self.attacks:
+        #     tree.add_node(att)
+        # tree.show()
+        # t = tree.get_combinations(self.arguments)
         for v in t:
             if self.is_stable_extension(v):
                 my_return.append(set(v))
