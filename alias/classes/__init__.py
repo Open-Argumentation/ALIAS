@@ -1,3 +1,4 @@
+from .maximalConflictFreeCollection import *
 from .store import *
 from .node import *
 from .tree import *

@@ -52,7 +52,7 @@ class Store(object):
 
     def add_attack(self, attack):
         self._attack_count += 1
-        print(self._attack_count)
+        # print(self._attack_count)
         # get ids of arguments from the attack
         start = time.time()
         condition1 = "name == b'" + attack[0] + "'"
@@ -60,7 +60,7 @@ class Store(object):
         arg1 = [x['id'] for x in self._arg_table.where(condition1)][0]
         arg2 = [x['id'] for x in self._arg_table.where(condition2)][0]
         end = time.time()
-        print('args ids fetched in '+ str(end - start))
+        # print('args ids fetched in '+ str(end - start))
 
         # get lists that have those arguments
         start = time.time()
@@ -69,13 +69,13 @@ class Store(object):
         arg1lists = [x['conflictFreeId'] for x in self._argument_conflict_free_table.where(condition1) if x['active'] == 1]
         arg2lists = [x['conflictFreeId'] for x in self._argument_conflict_free_table.where(condition2) if x['active'] == 1]
         end = time.time()
-        print('lists with those arguments fetched in ' + str(end - start))
+        # print('lists with those arguments fetched in ' + str(end - start))
 
         #get lists that have both of the arguments
         start = time.time()
         to_be_updated_lists = list(set(arg1lists).intersection(set(arg2lists)))
         end = time.time()
-        print('filtere lists in ' + str(end - start))
+        # print('filtere lists in ' + str(end - start))
 
         start = time.time()
         # iterate through lists to be updated
@@ -94,7 +94,7 @@ class Store(object):
                     bridge_table.append()
 
             y = time.time()
-            print('args grabbed in ' + str(y - x))
+            # print('args grabbed in ' + str(y - x))
             # remove attacked argument from the original list
             condition = "(argId == " + str(arg2) + ") & (conflictFreeId == " + str(v) + ")"
             for row in self._argument_conflict_free_table.where(condition):
@@ -102,8 +102,8 @@ class Store(object):
                 row.update()
 
         end = time.time()
-        print(str(len(to_be_updated_lists)) + ' lists updated in ' + str(end - start))
-        print(str(len(to_be_updated_lists)) + ' for total of ' + str(self._lists_count))
+        # print(str(len(to_be_updated_lists)) + ' lists updated in ' + str(end - start))
+        # print(str(len(to_be_updated_lists)) + ' for total of ' + str(self._lists_count))
 
         self._argument_conflict_free_table.flush()
 

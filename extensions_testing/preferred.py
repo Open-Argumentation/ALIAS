@@ -15,7 +15,7 @@ filename6 = '1/caravan-or-us.gml.80.tgf'                                        
 filename7 = '1/BA_60_70_3.tgf'                                                                # 100       | 900       |
 
 # full pat
-file = path + filename5
+file = path + filename4
 print('Reading file')
 start = time.time()
 af = alias.read_tgf(file)

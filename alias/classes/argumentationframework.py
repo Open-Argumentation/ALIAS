@@ -15,6 +15,8 @@ import numpy
 from sortedcontainers import SortedList
 
 from alias.classes import Matrix, Argument, Store, Framework, SymmetricArguments, Tree
+from alias.classes.maximalConflictFreeCollection import MaximalConflictFreeCollection
+
 
 class ArgumentationFramework(object):
 
@@ -25,7 +27,7 @@ class ArgumentationFramework(object):
         self.attacks = []  # collection of all attacks in the framework
         self._matrix = None  # matrix representation of the framework
         self._args_to_defence_sets = defaultdict(list)
-        self._store = Store()
+        # self._store = Store()
 
     @property
     def matrix(self):
@@ -61,7 +63,7 @@ class ArgumentationFramework(object):
         if arg not in self.arguments:
             counter = len(self.arguments)
             self.arguments[arg] = Argument(arg, counter)
-            self._store.add_argument(self.arguments[arg])
+            # self._store.add_argument(self.arguments[arg])
 
 
     def get_argument_from_mapping(self, mapping):
@@ -100,13 +102,13 @@ class ArgumentationFramework(object):
             self.add_argument(attacker)
         if attacked not in self.arguments:
             self.add_argument(attacked)
-        if not self.attacks:
-            self._store.setup_conflict_free_sets()
+        # if not self.attacks:
+        #     self._store.setup_conflict_free_sets()
 
         self.attacks.append((attacker, attacked))
         self.arguments[attacker].attacking.append(attacked)
         self.arguments[attacked].attacked_by.append(attacker)
-        self._store.add_attack((attacker, attacked))
+        # self._store.add_attack((attacker, attacked))
 
     def draw_graph(self):
         """
@@ -416,6 +418,23 @@ class ArgumentationFramework(object):
         :return:
         """
         return [x[0] for x in self.attacks if x[1] in arg_set]
+
+    def test_of_parallel_dictionaries(self):
+        print('test')
+        count = 0
+        self.attacks.sort(key=itemgetter(0, 1))
+        conflict_free_collection = MaximalConflictFreeCollection()
+        conflict_free_collection.add_arguments(self.arguments)
+        for attack in self.attacks:
+            count += 1
+            print('adding attack ' + str(count) + '/' +str(len(self.attacks)))
+            conflict_free_collection.add_attack(attack)
+
+        my_return = conflict_free_collection.get_conflict_free_sets()
+        for v in my_return:
+            if self.is_stable_extension(v):
+                print(v)
+
 
 """
 Those objects are used to create maximal conflict free sets
