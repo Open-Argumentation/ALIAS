@@ -16,11 +16,11 @@ class ArgumentationFrameworkTests(TestCase):
         """METHOD_TEARDOWN"""
 
     @parameterized.expand([
-        # [stable_prefix + 'stable1.tgf', stable_prefix + 'stable1answer'],
-        # [stable_prefix + 'stable2.tgf', stable_prefix + 'stable2answer'],
-        # [stable_prefix + 'stable3.tgf', stable_prefix + 'stable3answer'],
-        # [stable_prefix + 'stable4.tgf', stable_prefix + 'stable4answer'],
-        # [stable_prefix + 'stable5.tgf', stable_prefix + 'stable5answer'],
+        [stable_prefix + 'stable1.tgf', stable_prefix + 'stable1answer'],
+        [stable_prefix + 'stable2.tgf', stable_prefix + 'stable2answer'],
+        [stable_prefix + 'stable3.tgf', stable_prefix + 'stable3answer'],
+        [stable_prefix + 'stable4.tgf', stable_prefix + 'stable4answer'],
+        [stable_prefix + 'stable5.tgf', stable_prefix + 'stable5answer'],
         [stable_prefix + 'stable6.tgf', stable_prefix + 'stable6answer'],
     ])
     def stable_extension_test(self, framework, solution):

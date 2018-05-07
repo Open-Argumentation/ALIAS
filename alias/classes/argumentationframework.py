@@ -115,12 +115,7 @@ class ArgumentationFramework(object):
         Method to draw directed graph of the argumentation framework
         :return:
         """
-        graph = nx.DiGraph()
-
-        for n in self.arguments.keys():
-            graph.add_node(n)
-        for n in self.attacks:
-            graph.add_edge(n[0], n[1])
+        graph = self.get_graph()
         pos = nx.spring_layout(graph, k=0.30, iterations=20)
         nx.draw_networkx_nodes(graph, pos)
         nx.draw_networkx_labels(graph, pos)
@@ -185,27 +180,28 @@ class ArgumentationFramework(object):
         :return:
         """
         # TODO Should remove all elements which are not attacked nor attacking any other element first
-        my_return = []
-        """ this is with sets """
-        # test = self.get_conflict_free_sets()
-
-        """ this is with pytables """
-        self.attacks.sort(key=itemgetter(0, 1))
-        for att in self.attacks:
-            self._store.add_attack(att)
-        t = self._store.get_conflict_free_args()
-
-        """ this is with tree """
-        # tree = Tree()
+        # my_return = []
+        # """ this is with sets """
+        # # test = self.get_conflict_free_sets()
+        #
+        # """ this is with pytables """
         # self.attacks.sort(key=itemgetter(0, 1))
         # for att in self.attacks:
-        #     tree.add_node(att)
-        # tree.show()
-        # t = tree.get_combinations(self.arguments)
-        for v in t:
-            if self.is_stable_extension(v):
-                my_return.append(set(v))
-        return my_return
+        #     self._store.add_attack(att)
+        # t = self._store.get_conflict_free_args()
+        #
+        # """ this is with tree """
+        # # tree = Tree()
+        # # self.attacks.sort(key=itemgetter(0, 1))
+        # # for att in self.attacks:
+        # #     tree.add_node(att)
+        # # tree.show()
+        # # t = tree.get_combinations(self.arguments)
+        # for v in t:
+        #     if self.is_stable_extension(v):
+        #         my_return.append(set(v))
+        # return my_return
+        return self.test_of_parallel_dictionaries()
 
     def is_stable_extension(self, args):
         """
@@ -419,7 +415,7 @@ class ArgumentationFramework(object):
         """
         return [x[0] for x in self.attacks if x[1] in arg_set]
 
-    def test_of_parallel_dictionaries(self):
+    def test_of_parallel_dictionaries1(self):
         print('test')
         count = 0
         self.attacks.sort(key=itemgetter(0, 1))
@@ -434,6 +430,42 @@ class ArgumentationFramework(object):
         for v in my_return:
             if self.is_stable_extension(v):
                 print(v)
+
+    def test_of_parallel_dictionaries(self):
+        count = 0
+        conflict_free_collection = MaximalConflictFreeCollection()
+        conflict_free_collection.add_arguments(self.arguments)
+
+        graph = self.get_graph()
+
+        test = []
+        test2 = []
+        for k, v in self.arguments.items():
+            test.append((k, v.attacking + v.attacked_by))
+            test2.append((k, v.attacked_by))
+
+        test.sort(key=lambda t: len(t[1]), reverse=True)
+        test2.sort(key=lambda t: len(t[1]), reverse=True)
+
+        for v in test:
+            count += 1
+            print('adding argument ' + str(count) + '/' + str(len(self.arguments)))
+            conflict_free_collection.add_argument_and_attacks(v[0], v[1])
+
+        output = set()
+        my_return = conflict_free_collection.get_conflict_free_sets()
+        for v in my_return:
+            if self.is_stable_extension(v):
+                output.add(frozenset(v))
+        return output
+
+    def get_graph(self):
+        graph = nx.DiGraph()
+        for n in self.arguments.keys():
+            graph.add_node(n)
+        for n in self.attacks:
+            graph.add_edge(n[0], n[1])
+        return graph
 
 
 """
