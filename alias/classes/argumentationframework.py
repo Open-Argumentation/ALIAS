@@ -293,33 +293,39 @@ class ArgumentationFramework(object):
 
     def get_conflict_free_sets(self):
         solutions = []
-        all_clauses = []
-        def to_cnf(value):
-            no_attacks = self.get_clauses_for_no_attacks()
-            clauses = []
-            name = self.mapping[value]
-            if self.arguments[name].attacking:
-                for att in self.arguments[name].attacking:
-                    if self.arguments[att].attacking:
-                        for next_att in self.arguments[att].attacking:
-                            if next_att != name and next_att not in self.arguments[name].attacking and \
-                                    {-self.arguments[name].clause_mapping,
-                                     self.arguments[next_att].clause_mapping} not in solutions:
-                                t = [self.arguments[name].clause_mapping, -self.arguments[next_att].clause_mapping]
-                                clauses.append(t)
-            if self.arguments[name].attacking is None and self.arguments[name].attacked_by is None:
-                clauses.append([self.arguments[name].clause_mapping])
-            clauses = clauses + self.attack_clauses + no_attacks
-            # if clauses not in all_clauses:
-            all_clauses.append(clauses)
-            count = 0
-            for solution in pycosat.itersolve(clauses):
-                # count += 1
-                # # print(count)
-                solutions.append(solution)
+        all_clauses = self.__get_admissible_cnf()
+        # def to_cnf(value):
+        #     no_attacks = self.get_clauses_for_no_attacks()
+        #     clauses = []
+        #     name = self.mapping[value]
+        #     if self.arguments[name].attacking:
+        #         for att in self.arguments[name].attacking:
+        #             if self.arguments[att].attacking:
+        #                 for next_att in self.arguments[att].attacking:
+        #                     if next_att != name and next_att not in self.arguments[name].attacking and \
+        #                             {-self.arguments[name].clause_mapping,
+        #                              self.arguments[next_att].clause_mapping} not in solutions:
+        #                         t = [self.arguments[name].clause_mapping, -self.arguments[next_att].clause_mapping]
+        #                         clauses.append(t)
+        #     if self.arguments[name].attacking is None and self.arguments[name].attacked_by is None:
+        #         clauses.append([self.arguments[name].clause_mapping])
+        #     clauses = clauses + self.attack_clauses + no_attacks
+        #     # if clauses not in all_clauses:
+        #     all_clauses.append(clauses)
+        #     count = 0
+        # for solution in pycosat.itersolve(clauses):
+        #     count += 1
+        #     print(solution)
+        #
+        #     solutions.append(solution)
+        # print(count)
 
-        for k in self.arguments:
-            to_cnf(self.arguments[k].clause_mapping)
+        # for k in self.arguments:
+        #     to_cnf(self.arguments[k].clause_mapping)
+
+        for clause in all_clauses:
+            for solution in pycosat.itersolve(clause):
+                solutions.append(solution)
 
         for sol in solutions:
             mapped_sol = []
@@ -328,10 +334,29 @@ class ArgumentationFramework(object):
                     mapped_sol.append(self.mapping[value])
             yield mapped_sol
 
-    def get_solution_from_mapping(self, solution):
-        mapped_sol = []
-        for value in solution:
-            if value > 0:
-                mapped_sol.append(self.mapping[value])
-        return mapped_sol
+    def __get_admissible_cnf(self):
+        all_clauses = []
+        no_attacks = self.get_clauses_for_no_attacks()
 
+        def to_cnf(value):
+            clauses = []
+            name = self.mapping[value]
+            if self.arguments[name].attacking:
+                for att in self.arguments[name].attacking:
+                    if self.arguments[att].attacking:
+                        for next_att in self.arguments[att].attacking:
+                            if next_att != name and next_att not in self.arguments[name].attacking and \
+                                    {-self.arguments[name].clause_mapping,
+                                     self.arguments[next_att].clause_mapping} not in clauses:
+                                t = [self.arguments[name].clause_mapping, -self.arguments[next_att].clause_mapping]
+                                clauses.append(t)
+            if len(self.arguments[name].attacking) == 0 and len(self.arguments[name].attacked_by) == 0:
+                clauses.append([self.arguments[name].clause_mapping])
+            clauses = clauses + self.attack_clauses + no_attacks
+            all_clauses.append(clauses)
+
+        for k in self.arguments:
+            to_cnf(self.arguments[k].clause_mapping)
+
+        print(len(all_clauses))
+        return all_clauses
