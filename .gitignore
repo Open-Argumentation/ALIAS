@@ -169,3 +169,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+output\.png
+
+output_filename\.pstats

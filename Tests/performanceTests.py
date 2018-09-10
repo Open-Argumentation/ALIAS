@@ -1,14 +1,16 @@
+import time
+from datetime import datetime
 from unittest import TestCase
 from parameterized import parameterized
 from alias import *
-from Tests import TestHelper
 
 
 class ArgumentationFrameworkTests(TestCase):
     stable_prefix = './frameworks/stable/'
     complete_prefix = './frameworks/complete/'
     preferred_prefix = './frameworks/preferred/'
-    
+    five_sec = float(5)
+
     def setUp(self):
         """METHOD_SETUP"""
 
@@ -16,19 +18,19 @@ class ArgumentationFrameworkTests(TestCase):
         """METHOD_TEARDOWN"""
 
     @parameterized.expand([
-        [stable_prefix + 'stable1.tgf', stable_prefix + 'stable1answer'],
-        [stable_prefix + 'stable2.tgf', stable_prefix + 'stable2answer'],
-        [stable_prefix + 'stable3.tgf', stable_prefix + 'stable3answer'],
-        [stable_prefix + 'stable4.tgf', stable_prefix + 'stable4answer'],
-        [stable_prefix + 'stable5.tgf', stable_prefix + 'stable5answer'],
-        [stable_prefix + 'stable6.tgf', stable_prefix + 'stable6answer'],
+        [stable_prefix + 'stable1.tgf', five_sec],
+        [stable_prefix + 'stable2.tgf', five_sec],
+        [stable_prefix + 'stable3.tgf', five_sec],
+        [stable_prefix + 'stable4.tgf', five_sec],
+        [stable_prefix + 'stable5.tgf', five_sec],
+        [stable_prefix + 'stable6.tgf', five_sec],
     ])
-    def stable_extension_test(self, framework, solution):
+    def stable_extension_test(self, framework, maximal_duration):
+        started_at = time.time()
         argumentation_framework = alias.read_tgf(framework)
-        actual_stable = argumentation_framework.get_stable_extension()
-        # argumentation_framework.draw_graph()
-        expected_stable = TestHelper.read_solution_from_file(solution)
-        TestHelper.assertListsEqual(expected_stable, actual_stable)
+        argumentation_framework.get_stable_extension()
+        finished_at = time.time()
+        assert finished_at - started_at < maximal_duration, 'Execution time took ' + str(finished_at - started_at)
 
     # @parameterized.expand([
     #     [complete_prefix + 'preferred1.tgf', complete_prefix + 'complete1answer'],
@@ -45,15 +47,17 @@ class ArgumentationFrameworkTests(TestCase):
     #     TestHelper.assertListsEqual(expected_complete, actual_complete)
     # # #
     @parameterized.expand([
-        [preferred_prefix + 'preferred1.tgf', preferred_prefix + 'preferred1answer'],
-        [preferred_prefix + 'preferred2.tgf', preferred_prefix + 'preferred2answer'],
-        [preferred_prefix + 'preferred3.tgf', preferred_prefix + 'preferred3answer'],
-        [preferred_prefix + 'preferred4.tgf', preferred_prefix + 'preferred4answer'],
-        [preferred_prefix + 'preferred5.tgf', preferred_prefix + 'preferred5answer'],
-        [preferred_prefix + 'preferred6.tgf', preferred_prefix + 'preferred6answer'],
+        [preferred_prefix + 'preferred1.tgf', five_sec],
+        [preferred_prefix + 'preferred2.tgf', five_sec],
+        [preferred_prefix + 'preferred3.tgf', five_sec],
+        [preferred_prefix + 'preferred4.tgf', five_sec],
+        [preferred_prefix + 'preferred5.tgf', five_sec],
+        [preferred_prefix + 'preferred6.tgf', five_sec],
     ])
-    def preferred_extension_test(self, framework, solution):
+    def preferred_extension_test(self, framework, maximal_duration):
+        started_at = datetime.now()
         argumentation_framework = alias.read_tgf(framework)
         actual_preferred = argumentation_framework.get_preferred_extension()
-        expected_preferred = TestHelper.read_solution_from_file(solution)
-        TestHelper.assertListsEqual(expected_preferred, actual_preferred)
+        finished_at = datetime.now()
+        total_seconds = (finished_at - started_at).total_seconds()
+        assert total_seconds < maximal_duration, 'Execution time took ' + str(finished_at - started_at)

@@ -31,11 +31,17 @@ print(file)
 # af.draw_graph()
 print('Creating Stable Extension')
 start = time.time()
-gr = af.test_of_parallel_dictionaries()
-# gr = af.get_stable_extension()
+# gr = af.test_of_parallel_dictionaries()
+gr = af.get_stable_extension()
 # gr = af.get_conflict_free_sets()
+# gr = af.get_admissible_sets()
 end = time.time()
-print(gr)
+print("stable extensions: ")
+if gr is not None and len(gr) > 0:
+    for x in gr:
+        print(x)
+else:
+    print(gr)
 print('Stable Extension created in ' + str(end - start) + ' seconds')
 print('------------------------------------------------------------------')
 # for v in gr:

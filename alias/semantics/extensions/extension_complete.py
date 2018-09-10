@@ -1,7 +1,3 @@
-from memory_profiler import profile
-
-import alias as alias
-
 def extension_complete(af):
     comp = []
     for s in af.generate_powerset():
