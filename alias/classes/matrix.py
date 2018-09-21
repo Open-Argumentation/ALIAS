@@ -45,7 +45,7 @@ class Matrix(object):
         :param columns: indexes of columns to be included
         :return: sub matrix of original matrix limited to rows and columns provided
         """
-        return (self._matrix.todense()[list(rows), :])[:, list(columns)]
+        return (self._matrix.todense()[rows, :])[:, columns]
 
     def get_sub_blocks_with_zeros(self):
         """

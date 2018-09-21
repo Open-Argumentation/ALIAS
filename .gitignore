@@ -172,3 +172,5 @@ fabric.properties
 output\.png
 
 output_filename\.pstats
+
+extensions_testing/stable\.py

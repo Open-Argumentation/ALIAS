@@ -4,11 +4,12 @@ from _ast import alias
 from collections import OrderedDict, defaultdict, Counter
 from operator import itemgetter
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import networkx as nx
 
 from alias.classes import Matrix, Argument
 from alias.classes.maximalConflictFreeCollection import MaximalConflictFreeCollection
+import satispy
 
 
 
@@ -103,7 +104,7 @@ class ArgumentationFramework(object):
         self.arguments[attacker].attacking.append(attacked)
         self.arguments[attacked].attacked_by.append(attacker)
         # check if the reverse clause is not already present
-        if [-self.arguments[attacked].clause_mapping, -self.arguments[attacker].clause_mapping] not in self.attack_clauses:
+        if (-self.arguments[attacked].clause_mapping, -self.arguments[attacker].clause_mapping) not in self.attack_clauses:
             self.attack_clauses.append((-self.arguments[attacker].clause_mapping, -self.arguments[attacked].clause_mapping))
         # self._store.add_attack((attacker, attacked))
 
@@ -117,7 +118,7 @@ class ArgumentationFramework(object):
         nx.draw_networkx_nodes(graph, pos)
         nx.draw_networkx_labels(graph, pos)
         nx.draw_networkx_edges(graph, pos)
-        # plt.show()
+        plt.show()
 
     def get_arguments_not_attacked(self):
         not_attacked = []
@@ -176,7 +177,8 @@ class ArgumentationFramework(object):
         :return:
         """
         result = set()
-        for x in self.get_conflict_free_sets():
+        conflict_free = self.get_conflict_free_sets()
+        for x in conflict_free:
             if self.is_stable_extension(x):
                 result.add(frozenset(x))
         return result
@@ -201,9 +203,10 @@ class ArgumentationFramework(object):
         :return: list of sets of complete extension
         """
         result = set()
-        for conflict_free in self.get_conflict_free_sets():
-            if self.__is_preferred_extension(conflict_free):
-                result.add(frozenset(conflict_free))
+        conflict_free = self.get_conflict_free_sets()
+        for x in conflict_free:
+            if self.__is_preferred_extension(x):
+                result.add(frozenset(x))
         return result
 
 
@@ -214,15 +217,15 @@ class ArgumentationFramework(object):
         :return: True if set is a preferred extension
         """
         if args:
-            arguments_to_check = [self.arguments[x].mapping for x in self.arguments if x not in args and x not in self.get_attacks_of_set(args)]
+            args_to_check = set(self.arguments.keys()) - set(args) - set(self.get_attacks_of_set(args))
+            arguments_to_check = [self.arguments[x].mapping for x in args_to_check]
             if not arguments_to_check:
                 return True
             else:
                 my_column_vertices = self.matrix.get_sub_matrix(arguments_to_check, arguments_to_check)
-                for row in my_column_vertices.sum(axis=0).tolist():
-                    for v in row:
-                        if v == 0:
-                            return False
+                sum_of_vertices = my_column_vertices.sum(axis=0).tolist()
+                if 0 in sum_of_vertices:
+                    return False
                 return True
         return False
 
@@ -292,19 +295,25 @@ class ArgumentationFramework(object):
         return my_return
 
     def get_conflict_free_sets(self):
+        self.attack_clauses.sort(key=itemgetter(0,1), reverse=True)
+        self.attacks.sort(key=itemgetter(0,1), reverse=False)
         all_clauses = self.__get_admissible_cnf()
         c = Counter(map(tuple, all_clauses))
-        duplicates = [k for k, v in c.items() if v > 1]
+        duplicates = [(k, v) for k, v in c.items() if v > 1]
         for duplicate in duplicates:
-            all_clauses.remove(list(duplicate))
-        print(len(all_clauses))
+            for _ in range(duplicate[1] -1 ):
+                all_clauses.remove(list(duplicate[0]))#
+        cl_count = 0
         for clause in all_clauses:
+            cl_count += 1
+            count = 0
             for solution in pycosat.itersolve(clause):
                 mapped_sol = []
                 for value in solution:
                     if value > 0:
                         mapped_sol.append(self.mapping[value])
-                # print(mapped_sol)
+                count += 1
+                print('Clause: ' + str(cl_count) + ' solution: ' + str(count))
                 yield mapped_sol
 
     def __get_admissible_cnf(self):
@@ -314,11 +323,13 @@ class ArgumentationFramework(object):
         def to_cnf(value):
             clauses = []
             name = self.mapping[value]
-            self.__get_next_defence_arg(name, clauses)
-            if len(self.arguments[name].attacking) == 0 and len(self.arguments[name].attacked_by) == 0:
-                clauses.append((self.arguments[name].clause_mapping,))
+            clauses.append((value,))
+
+            self.__get_next_defence_arg(name, clauses, [])
+            # if len(self.arguments[name].attacking) == 0 and len(self.arguments[name].attacked_by) == 0:
             clauses = clauses + self.attack_clauses + no_attacks
-            all_clauses.append(clauses)
+            if len(clauses) > 0:
+                all_clauses.append(clauses)
 
         for k in self.arguments:
             to_cnf(self.arguments[k].clause_mapping)
@@ -326,19 +337,45 @@ class ArgumentationFramework(object):
         print(len(all_clauses))
         return all_clauses
 
-    def __get_next_defence_arg(self, name, clauses, path=[]):
-        path = path
+    def __get_next_defence_arg(self, name, clauses, pathx=[]):
+        path = pathx
+        if name in path:
+            return
         path.append(name)
         if self.arguments[name].attacking:
+            # clauses.append((self.arguments[name].clause_mapping,))
             for att in self.arguments[name].attacking:
+                # if att in path:
+                #     return
+                path_att = path.copy()
+                path_att.append(att)
+                if (-self.arguments[att].clause_mapping,) not in clauses:
+                    clauses.append((-self.arguments[att].clause_mapping,))
                 if self.arguments[att].attacking:
                     for next_att in self.arguments[att].attacking:
                         if next_att not in path and\
                                 next_att != name and next_att not in self.arguments[name].attacking and \
-                                {-self.arguments[name].clause_mapping,
-                                 self.arguments[next_att].clause_mapping} not in clauses:
+                                (-self.arguments[name].clause_mapping, self.arguments[next_att].clause_mapping) not in clauses and \
+                                (-self.arguments[next_att].clause_mapping, self.arguments[name].clause_mapping) not in clauses:
                             t = (self.arguments[name].clause_mapping, -self.arguments[next_att].clause_mapping)
                             clauses.append(t)
-                            self.__get_next_defence_arg(next_att, clauses, path)
+                            path_def = path_att.copy()
+                            path_def.append(next_att)
+                            self.__get_next_defence_arg(next_att, clauses, path_def.copy())
         else:
             return
+
+    def test_satispy(self):
+        satispy_dict = {}
+        for arg in self.arguments:
+            satispy_dict[arg] = satispy.Variable(arg)
+        self.attacks.sort(key=itemgetter(0, 1))
+        expression = satispy.Cnf()
+        for att in self.attacks:
+            expression += (-satispy_dict[att[0]] | -satispy_dict[att[1]])
+
+        solver = satispy.solver.Minisat()
+        solution = solver.solve(expression)
+
+        if solution.success:
+            print(str(solution))
