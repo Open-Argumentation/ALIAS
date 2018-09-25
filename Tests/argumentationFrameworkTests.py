@@ -26,7 +26,6 @@ class ArgumentationFrameworkTests(TestCase):
     def stable_extension_test(self, framework, solution):
         argumentation_framework = alias.read_tgf(framework)
         actual_stable = argumentation_framework.get_stable_extension()
-        # argumentation_framework.draw_graph()
         expected_stable = TestHelper.read_solution_from_file(solution)
         TestHelper.assertListsEqual(expected_stable, actual_stable)
 

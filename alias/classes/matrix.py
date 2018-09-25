@@ -1,7 +1,4 @@
-from collections import defaultdict
-import numpy
 from scipy import sparse
-from itertools import combinations
 
 
 class Matrix(object):
@@ -46,33 +43,3 @@ class Matrix(object):
         :return: sub matrix of original matrix limited to rows and columns provided
         """
         return (self._matrix.todense()[rows, :])[:, columns]
-
-    def get_sub_blocks_with_zeros(self):
-        """
-        Method to generate all sub blocks from original matrix where all values are 0's. Not efficient
-        :return: list of sets of indexes for matrix where values in corresponding rows/columns are 0's
-        """
-        my_matrix = self.to_dense
-        my_return = []
-        test = defaultdict(set)
-        zeros = numpy.where(my_matrix == 0)
-        for k, v in zip(zeros[0], zeros[1]):
-            test[k].add(v)
-        for v in range(0, my_matrix.shape[0]):
-            possible_combinations = combinations(range(my_matrix.shape[0]), v + 1)
-            for comb in possible_combinations:
-                my_sets = [test[x] for x in comb]
-                intersection = set(comb).intersection(*my_sets)
-                if len(intersection) == len(comb):
-                    my_return.append(list(intersection))
-        return my_return
-
-    def get_mappings(self):
-        if self._arguments is not None:
-            return self._arguments
-
-    def is_set_conflict_free(self, set_to_test):
-        matrix_to_test = self.get_sub_matrix(set_to_test, set_to_test)
-        if len(numpy.where(matrix_to_test == 1)[0]) > 0:
-            return False
-        return True

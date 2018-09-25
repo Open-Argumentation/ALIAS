@@ -20,7 +20,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python :: 2.7'
     ],
-    install_requires=['', 'tables', 'ortools', 'parameterized', 'matplotlib'],
+    install_requires=['', 'tables', 'ortools', 'parameterized', 'matplotlib', 'scipy'],
     packages=find_packages(exclude=['docs', 'tests*']),
     extras_require={
         'inout': ['pyparsing', 'networkx'],
