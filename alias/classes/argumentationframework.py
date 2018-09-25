@@ -128,6 +128,21 @@ class ArgumentationFramework(object):
         return result
 
     def __is_complete_extension(self, args):
+        if args:
+            args_to_check = [self.arguments[x].mapping for x in set(self.arguments.keys()) - set(args)]
+            args_mappings = [self.arguments[x].mapping for x in args]
+            my_column_vertices = self.matrix.get_sub_matrix(args_mappings, args_to_check)
+            my_row_vertices = self.matrix.get_sub_matrix(args_to_check, args_to_check)
+
+            my_sum_column_vertices = my_column_vertices.sum(axis=0).tolist()
+            my_sum_row_vertices = my_row_vertices.sum(axis=0).tolist()
+
+
+            for v in zip(my_sum_row_vertices[0], my_sum_column_vertices[0]):
+                if v[0] > 0:
+                    if v[1] == 0:
+                        return False
+            return True
         return False
 
     def get_preferred_extension(self):
