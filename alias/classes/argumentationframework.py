@@ -120,8 +120,15 @@ class ArgumentationFramework(object):
         return False
     
     def get_complete_extension(self):
-        # for conflict_free in self.get_conflict_free_sets():
-        return []
+        result = set()
+        conflict_free = self.get_conflict_free_sets()
+        for x in conflict_free:
+            if self.__is_complete_extension(x):
+                result.add(frozenset(x))
+        return result
+
+    def __is_complete_extension(self, args):
+        return False
 
     def get_preferred_extension(self):
         """
@@ -177,23 +184,22 @@ class ArgumentationFramework(object):
         self.attack_clauses.sort(key=itemgetter(0,1), reverse=True)
         self.attacks.sort(key=itemgetter(0,1), reverse=False)
         all_clauses = self.__get_admissible_cnf()
-        c = Counter(map(tuple, all_clauses))
-        duplicates = [(k, v) for k, v in c.items() if v > 1]
-        for duplicate in duplicates:
-            for _ in range(duplicate[1] -1 ):
-                all_clauses.remove(list(duplicate[0]))#
-        cl_count = 0
+        all_clauses = self.__remove_duplicate_clauses(all_clauses)
         for clause in all_clauses:
-            cl_count += 1
-            count = 0
             for solution in pycosat.itersolve(clause):
                 mapped_sol = []
                 for value in solution:
                     if value > 0:
                         mapped_sol.append(self.mapping[value])
-                count += 1
-                print('Clause: ' + str(cl_count) + ' solution: ' + str(count))
                 yield mapped_sol
+
+    def __remove_duplicate_clauses(self, all_clauses):
+        c = Counter(map(tuple, all_clauses))
+        duplicates = [(k, v) for k, v in c.items() if v > 1]
+        for duplicate in duplicates:
+            for _ in range(duplicate[1] - 1):
+                all_clauses.remove(list(duplicate[0]))
+        return all_clauses
 
     def __get_admissible_cnf(self):
         all_clauses = []
@@ -213,7 +219,6 @@ class ArgumentationFramework(object):
         for k in self.arguments:
             to_cnf(self.arguments[k].clause_mapping)
 
-        print(len(all_clauses))
         return all_clauses
 
     def __get_next_defence_arg(self, name, clauses, pathx=[]):

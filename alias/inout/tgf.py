@@ -53,7 +53,7 @@ def read_tgf(path):
     try:
         parsed = graph.parseString(f)
     except ParseException as e:
-        raise al.ParsingException(e)
+        raise e
 
     for arg in parsed[0]:
         framework.add_argument(arg)
