@@ -139,8 +139,8 @@ class ArgumentationFramework(object):
 
 
             for v in zip(my_sum_row_vertices[0], my_sum_column_vertices[0]):
-                if v[0] > 0:
-                    if v[1] == 0:
+                if v[1] == 0:
+                    if v[0] < 1:
                         return False
             return True
         return False

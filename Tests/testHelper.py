@@ -11,5 +11,12 @@ class TestHelper(object):
             if x not in actual:
                 equal = False
         if not equal:
-            raise AssertionError('Lists are not equal. Expected ' + str(expected) + ', actual: ' + str(actual))
+            error = 'Lists are not equal. Expected ' + str(expected) + ', actual: ' + str(actual) + '\n'
+            if len(actual) < len(expected):
+                error += 'Solution missing following items: ' + str(expected - actual)
+            else:
+                error += 'Solution has additional items: ' + str(actual - expected)
+
+            error += '\nExpected has ' + str(len(expected)) + ' items, Actual has ' + str(len(actual)) + ' items.'
+            raise AssertionError(error)
 

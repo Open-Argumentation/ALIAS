@@ -17,7 +17,7 @@ filename8 = '1/ferry2.pfile-L3-C2-02.pddl.2.cnf.tgf'                            
 filename9 = '3/stb_496_268.tgf'
 
 # full pat
-file = path + filename6
+file = path + filename3
 print('Reading file')
 start = time.time()
 af = alias.read_tgf(file)
@@ -29,11 +29,13 @@ print('Number of attacks: ' + str(len(af.attacks)))
 
 print('Creating Preferred Extension')
 start = time.time()
-gr = af.get_preferred_extension()
+gr = af.get_complete_extension()
+pr = af.get_preferred_extension()
 # gr = af.test_of_parallel_dictionaries()
 # gr = af.SatSolver()
 end = time.time()
 print(gr)
+print(pr)
 print('Preferred Extension created in ' + str(end - start) + ' seconds')
 print('------------------------------------------------------------------')
 # af.draw_graph()

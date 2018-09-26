@@ -29,20 +29,20 @@ class ArgumentationFrameworkTests(TestCase):
         expected_stable = TestHelper.read_solution_from_file(solution)
         TestHelper.assertListsEqual(expected_stable, actual_stable)
 
-    # @parameterized.expand([
-    #     [complete_prefix + 'preferred1.tgf', complete_prefix + 'complete1answer'],
-    #     [complete_prefix + 'complete2.tgf', complete_prefix + 'complete2answer'],
-    #     [complete_prefix + 'complete3.tgf', complete_prefix + 'complete3answer'],
-    #     [complete_prefix + 'complete4.tgf', complete_prefix + 'complete4answer'],
-    #     [complete_prefix + 'complete5.tgf', complete_prefix + 'complete5answer'],
-    #     [complete_prefix + 'complete6.tgf', complete_prefix + 'complete6answer'],
-    # ])
-    # def complete_extension_test(self, framework, solution):
-    #     argumentation_framework = alias.read_tgf(framework)
-    #     actual_complete = argumentation_framework.get_complete_extension()
-    #     expected_complete = TestHelper.read_solution_from_file(solution)
-    #     TestHelper.assertListsEqual(expected_complete, actual_complete)
-    # # #
+    @parameterized.expand([
+        [complete_prefix + 'complete1.tgf', complete_prefix + 'complete1answer'],
+        [complete_prefix + 'complete2.tgf', complete_prefix + 'complete2answer'],
+        [complete_prefix + 'complete3.tgf', complete_prefix + 'complete3answer'],
+        [complete_prefix + 'complete4.tgf', complete_prefix + 'complete4answer'],
+        [complete_prefix + 'complete5.tgf', complete_prefix + 'complete5answer'],
+        [complete_prefix + 'complete6.tgf', complete_prefix + 'complete6answer'],
+    ])
+    def complete_extension_test(self, framework, solution):
+        argumentation_framework = alias.read_tgf(framework)
+        actual_complete = argumentation_framework.get_complete_extension()
+        expected_complete = TestHelper.read_solution_from_file(solution)
+        TestHelper.assertListsEqual(expected_complete, actual_complete)
+
     @parameterized.expand([
         [preferred_prefix + 'preferred1.tgf', preferred_prefix + 'preferred1answer'],
         [preferred_prefix + 'preferred2.tgf', preferred_prefix + 'preferred2answer'],
