@@ -56,6 +56,12 @@ class ArgumentationFramework(object):
             self.arguments[arg] = Argument(arg, counter, counter+1)
             self.mapping[counter+1] = arg
 
+    def get_args_count(self):
+        return len(self.arguments)
+
+    def get_attacks_count(self):
+        return len(self.attacks)
+
     def add_attack(self, attack):
         """
         Method to add attack to argumentation framework
