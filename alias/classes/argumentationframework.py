@@ -83,20 +83,20 @@ class ArgumentationFramework(object):
             self.attack_clauses.append((-self.arguments[attacker].clause_mapping, -self.arguments[attacked].clause_mapping))
         # self._store.add_attack((attacker, attacked))
 
+    def get_graph(self):
+        graph = nx.DiGraph()
+        for n in self.arguments.keys():
+            graph.add_node(n)
+        for n in self.attacks:
+            graph.add_edge(n[0], n[1])
+        return graph
+
     def draw_graph(self):
         """
         Method to draw directed graph of the argumentation framework
         :return:
         """
-        def get_graph():
-            graph = nx.DiGraph()
-            for n in self.arguments.keys():
-                graph.add_node(n)
-            for n in self.attacks:
-                graph.add_edge(n[0], n[1])
-            return graph
-
-        graph = get_graph()
+        graph = self.get_graph()
         pos = nx.spring_layout(graph, k=0.30, iterations=20)
         nx.draw_networkx_nodes(graph, pos)
         nx.draw_networkx_labels(graph, pos)
