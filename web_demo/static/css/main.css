@@ -1,12 +1,20 @@
 #cy {
         width: 100%;
         height: 100%;
-        position: absolute;
-        top: 0px;
-        left: 0px;
     }
 
-.main {
-    width: 100%;
-    height: 100%;
+.solutions {
+
+}
+
+#sol_title {
+    width:100%;
+    border-bottom: 2px solid grey;
+    padding: 5px;
+    color: whitesmoke;
+    background-color: dimgray;
+}
+
+.node_sol {
+    background-color: green;
 }
