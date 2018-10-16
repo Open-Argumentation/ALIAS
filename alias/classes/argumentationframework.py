@@ -171,10 +171,11 @@ class ArgumentationFramework(object):
                 return True
             else:
                 my_column_vertices = self.matrix.get_sub_matrix(arguments_to_check, arguments_to_check)
-                sum_of_vertices = my_column_vertices.sum(axis=0).tolist()
-                if 0 in sum_of_vertices:
-                    return False
-                return True
+                sum_of_vertices = my_column_vertices.sum(axis=0).tolist()[0]
+                for v in sum_of_vertices:
+                    if v == 0:
+                        return False
+            return True
         return False
 
     def __get_attacks_of_set(self, arg_set):

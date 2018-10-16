@@ -17,7 +17,7 @@ filename8 = '1/ferry2.pfile-L3-C2-02.pddl.2.cnf.tgf'                            
 filename9 = '3/stb_496_268.tgf'
 
 # full pat
-file = path + filename3
+file = path + filename2
 print('Reading file')
 start = time.time()
 af = alias.read_tgf(file)
