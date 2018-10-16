@@ -7,7 +7,7 @@ $(function(){
 });
 
 var is_framework = false;
-var frameworks = ['af1', 'af2', 'af3', 'af4', 'af5', 'af6'];
+var frameworks = ['a0', 'af1', 'af2', 'af3', 'af4', 'af5', 'af6'];
 var extensions = ['Complete', 'Stable', 'Preferred'];
 var selected_extension = '';
 var cy;
