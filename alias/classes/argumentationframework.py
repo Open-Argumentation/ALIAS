@@ -4,6 +4,8 @@ from operator import itemgetter
 
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy
+import scipy
 
 from alias.classes import Matrix, Argument
 
@@ -134,6 +136,7 @@ class ArgumentationFramework(object):
         return result
 
     def __is_complete_extension(self, args):
+        my_result = False
         if args:
             args_to_check = [self.arguments[x].mapping for x in set(self.arguments.keys()) - set(args)]
             args_mappings = [self.arguments[x].mapping for x in args]
@@ -143,13 +146,28 @@ class ArgumentationFramework(object):
             my_sum_column_vertices = my_column_vertices.sum(axis=0).tolist()
             my_sum_row_vertices = my_row_vertices.sum(axis=0).tolist()
 
-
+            subblock = []
+            counter = 0
             for v in zip(my_sum_row_vertices[0], my_sum_column_vertices[0]):
                 if v[1] == 0:
+                    subblock.append(counter)
                     if v[0] < 1:
                         return False
-            return True
-        return False
+                counter += 1
+
+
+            test = numpy.where(my_row_vertices == 1)
+            counter = 0
+
+            check = {}
+            for v in test[0]:
+                if test[1][counter] in subblock and my_sum_column_vertices[0][v] != 0 and test[1][counter] not in check:
+                    check[test[1][counter]] = False
+                else:
+                    check[test[1][counter]] = True
+                counter += 1
+            my_result = False if False in check.values() else True
+        return my_result
 
     def get_preferred_extension(self):
         """
