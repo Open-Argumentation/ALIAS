@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import os
 import alias
 
@@ -34,6 +34,14 @@ def extension(ext_id):
         return "Please select argumentation framework first"
 
 
+@app.route('/upload_file', methods=['POST'])
+def upload_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        global af
+        file.save(os.path.join("./", file.filename))
+        af = alias.read_tgf("./" + file.filename)
+        return alias.get_json(af)
 
 if __name__ == '__main__':
     app.run()

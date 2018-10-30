@@ -42,6 +42,8 @@
                       Frameworks<span class="caret"></span>
                     </a>
                     <div class="dropdown-menu" id="example_frameworks">
+                        <a class="dropdown-item" href="#myModal" data-toggle="modal">Upload file</a>
+                        <div class="dropdown-divider"></div>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -72,20 +74,43 @@
             </div>
         </div>
 	</div>
-        <div class="loadingDiv">
-            <div class="sk-circle">
-              <div class="sk-circle1 sk-child"></div>
-              <div class="sk-circle2 sk-child"></div>
-              <div class="sk-circle3 sk-child"></div>
-              <div class="sk-circle4 sk-child"></div>
-              <div class="sk-circle5 sk-child"></div>
-              <div class="sk-circle6 sk-child"></div>
-              <div class="sk-circle7 sk-child"></div>
-              <div class="sk-circle8 sk-child"></div>
-              <div class="sk-circle9 sk-child"></div>
-              <div class="sk-circle10 sk-child"></div>
-              <div class="sk-circle11 sk-child"></div>
-              <div class="sk-circle12 sk-child"></div>
+    <div class="loadingDiv">
+        <div class="sk-circle">
+          <div class="sk-circle1 sk-child"></div>
+          <div class="sk-circle2 sk-child"></div>
+          <div class="sk-circle3 sk-child"></div>
+          <div class="sk-circle4 sk-child"></div>
+          <div class="sk-circle5 sk-child"></div>
+          <div class="sk-circle6 sk-child"></div>
+          <div class="sk-circle7 sk-child"></div>
+          <div class="sk-circle8 sk-child"></div>
+          <div class="sk-circle9 sk-child"></div>
+          <div class="sk-circle10 sk-child"></div>
+          <div class="sk-circle11 sk-child"></div>
+          <div class="sk-circle12 sk-child"></div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="myModalLabel">Load Argumentation Framework from file</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <form id="myForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                          <div class="form-group">
+                            <label for="exampleFormControlFile1">Please select file in tgf format</label>
+                            <input type="file" class="form-control-file" id="exampleFormControlFile1" name="file">
+                          </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <button type="submit" class="btn btn-primary" id="submit">Upload</button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 </body>

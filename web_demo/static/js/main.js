@@ -4,6 +4,10 @@ $(function(){
     setupFrameworkList();
     setupExtensions();
     enableExtensions();
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        uploadFile();
+    });
 });
 
 var is_framework = false;
@@ -14,7 +18,6 @@ var cy;
 
 function setupFrameworkList() {
     var myList = $('#example_frameworks');
-    myList.empty();
 
     $.each(frameworks, function (i) {
         var aa = $('<a/>')
@@ -27,71 +30,76 @@ function setupFrameworkList() {
     $('#example_frameworks a').click(function () {
         $('.sol_list').empty();
         $.post('/framework/' + this.id, function (data) {
-
-            var json = $.parseJSON(data)
-            cy = cytoscape({
-                container: $('#cy'),
-                style: [
-                    {
-                        selector: '.node_sol',
-                        style: {
-                            'background-color': 'green',
-                        }
-                    },
-                    {
-                        selector: 'node',
-                        style: {
-                            'label': 'data(label)',
-                            'border': 'grey',
-                            'labelValign': 'center',
-                            'labelHalign': 'center',
-                        }
-                    },
-                    {
-                        selector: 'edge',
-                        style: {
-                            'curve-style': 'bezier',
-                            'width': 3,
-                            'line-color': '#ccc',
-                            'target-arrow-color': '#ccc',
-                            'target-arrow-shape': 'triangle'
-                        }
-                    }
-
-                ]
-            });
-
-            $.each(json['arguments'], function(i, obj) {
-                cy.add({
-                    data: {
-                        id: obj['name'],
-                        label: obj['name']
-                    }
-                });
-            });
-
-            $.each(json['arguments'], function(i, obj) {
-                $.each(obj['attacks'], function(j, attack) {
-                    cy.add({
-                        data: {
-                            id: 'edge_' + obj['name'] + '_' + attack + '_' + i + j,
-                            source: obj['name'],
-                            target: attack,
-                        }
-                    });
-                })
-            });
-
-            cy.layout({
-                name: 'cola',
-                    infinite: true,
-                    fit: false,
-            });
-
-            is_framework = true;
-            enableExtensions();
+            renderFramework($.parseJSON(data));
         });
     });
+}
+
+function renderFramework(data)
+{
+    console.log(data);
+    var json = data
+    cy = cytoscape({
+        container: $('#cy'),
+        style: [
+            {
+                selector: '.node_sol',
+                style: {
+                    'background-color': 'green',
+                }
+            },
+            {
+                selector: 'node',
+                style: {
+                    'label': 'data(label)',
+                    'border': 'grey',
+                    'labelValign': 'center',
+                    'labelHalign': 'center',
+                }
+            },
+            {
+                selector: 'edge',
+                style: {
+                    'curve-style': 'bezier',
+                    'width': 3,
+                    'line-color': '#ccc',
+                    'target-arrow-color': '#ccc',
+                    'target-arrow-shape': 'triangle'
+                }
+            }
+
+        ]
+    });
+
+    $.each(json['arguments'], function(i, obj) {
+        cy.add({
+            data: {
+                id: obj['name'],
+                label: obj['name']
+            }
+        });
+    });
+
+    $.each(json['arguments'], function(i, obj) {
+        $.each(obj['attacks'], function(j, attack) {
+            cy.add({
+                data: {
+                    id: 'edge_' + obj['name'] + '_' + attack + '_' + i + j,
+                    source: obj['name'],
+                    target: attack,
+                }
+            });
+        })
+    });
+
+    cy.layout({
+        name: 'cola',
+            infinite: true,
+            fit: false,
+    });
+
+    is_framework = true;
+    enableExtensions();
 }
 
 function enableExtensions()
@@ -160,4 +168,23 @@ function setupSpinner()
         .ajaxStop(function(){
             $loading.hide();
         })
+}
+
+function uploadFile()
+{
+    var formData = new FormData($('#myForm')[0]);
+    for (var [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+    $.ajax({
+        type: 'POST',
+        data: formData,
+        url: '/upload_file',
+        contentType: false,
+        processData: false,
+        dataType: 'json'
+    }).done(function(data, textStatus, jqXHR){
+        $('#myModal').modal('toggle');
+        renderFramework(data);
+    });
 }

@@ -161,7 +161,7 @@ class ArgumentationFramework(object):
 
             check = {}
             for v in test[0]:
-                if test[1][counter] in subblock and my_sum_column_vertices[0][v] != 0 and test[1][counter] not in check:
+                if test[1][counter] in subblock and  my_sum_column_vertices[0][v] != 0 and test[1][counter] not in check:
                     check[test[1][counter]] = False
                 else:
                     check[test[1][counter]] = True
