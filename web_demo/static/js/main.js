@@ -6,28 +6,28 @@ $(function(){
     enableExtensions();
     $('#submit').on('click', function(e){
         e.preventDefault();
-        $('#sol_title').text('Solution:)
+        $('#sol_title').text('Solution:');
         $('.sol_list').empty();
         uploadFile();
     });
 
     $('#submitAddArgument').on('click', function(e){
         e.preventDefault();
-        $('#sol_title').text('Solution:)
+        $('#sol_title').text('Solution:');
         $('.sol_list').empty();
         addArgument();
     });
 
     $('#submitAddAttack').on('click', function (e) {
         e.preventDefault();
-        $('#sol_title').text('Solution:)
+        $('#sol_title').text('Solution:');
         $('.sol_list').empty();
         addAttack();
     })
 
     $('#newFramework').on('click', function (e) {
         e.preventDefault();
-        $('#sol_title').text('Solution:)
+        $('#sol_title').text('Solution:');
         $('.sol_list').empty();
         createNewFramework();
     })
@@ -69,6 +69,7 @@ function renderFramework(data)
                 selector: '.node_sol',
                 style: {
                     'background-color': 'green',
+                    'color': 'white',
                 }
             },
             {
@@ -78,6 +79,8 @@ function renderFramework(data)
                     'border': 'grey',
                     'labelValign': 'center',
                     'labelHalign': 'center',
+                    'text-halign': 'center',
+                    'text-valign': 'center',
                 }
             },
             {
