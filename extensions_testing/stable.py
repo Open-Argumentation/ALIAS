@@ -18,7 +18,7 @@ filename8 = '1/stb_199_128.tgf'
 filename9 = '1/test.tgf'
 
 # full path
-file = path + filename3
+file = path + filename4
 print('Reading file')
 start = time.time()
 af = alias.read_tgf(file)

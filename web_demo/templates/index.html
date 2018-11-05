@@ -1,0 +1,175 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- cytoscape -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.17/cytoscape.min.js"></script>
+    <!-- custom scripts -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.7.16/cytoscape.min.js"></script>
+    <script src="https://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/1.5.0/cytoscape-cola.js"></script>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+        <!-- Header navbar -->
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+            <a class="navbar-brand" href="#">Alias</a>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <!--<ul class="navbar-nav mr-auto">-->
+            <!--<li class="nav-item dropdown">-->
+              <!--<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Frameworks<span class="caret"></span></a>-->
+              <!--<ul class="nav-item dropdown-menu" id="example_frameworks">-->
+                <!--<li><a href="#" class="nav-link">example 1</a></li>-->
+              <!--</ul>-->
+            <!--</li>-->
+            <!--<li class="nav-item dropdown">-->
+              <!--<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Extensions<span class="caret"></span></a>-->
+              <!--<ul class="dropdown-menu" id="extensions">-->
+              <!--</ul>-->
+            <!--</li>-->
+            <!--&lt;!&ndash;<li><a href="#">Create new</a></li>&ndash;&gt;-->
+            <!--</ul>-->
+
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Frameworks<span class="caret"></span>
+                    </a>
+                    <div class="dropdown-menu" id="example_frameworks">
+                        <a class="dropdown-item" href="#myModal" data-toggle="modal">Upload file</a>
+                        <div class="dropdown-divider"></div>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Extensions<span class="caret"></span>
+                    </a>
+                    <div class="dropdown-menu" id="extensions">
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="newFramework">New Framework</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#modalAddArgument" data-toggle="modal" class="nav-link" id="addArgument">Add argument</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#modalAddAttack" data-toggle="modal" class="nav-link" id="addAttack">Add attack</a>
+                </li>
+            </ul>
+    </nav>
+
+
+	<div class="container-fluid">
+        <div class="row">
+            <div class="col-md-10 main">
+                <div class="row">
+                    <div id="cy"></div>
+                </div>
+            </div>
+            <div class="col-md-2 solutions">
+                <div class="row">
+                    <div id="sol_title">Solution: </div>
+                </div>
+                <ul class="list-group list-group-flush sol_list">
+
+                </ul>
+            </div>
+        </div>
+	</div>
+    <div class="loadingDiv">
+        <div class="sk-circle">
+          <div class="sk-circle1 sk-child"></div>
+          <div class="sk-circle2 sk-child"></div>
+          <div class="sk-circle3 sk-child"></div>
+          <div class="sk-circle4 sk-child"></div>
+          <div class="sk-circle5 sk-child"></div>
+          <div class="sk-circle6 sk-child"></div>
+          <div class="sk-circle7 sk-child"></div>
+          <div class="sk-circle8 sk-child"></div>
+          <div class="sk-circle9 sk-child"></div>
+          <div class="sk-circle10 sk-child"></div>
+          <div class="sk-circle11 sk-child"></div>
+          <div class="sk-circle12 sk-child"></div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="myModalLabel">Load Argumentation Framework from file</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <form id="myForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                          <div class="form-group">
+                            <label for="exampleFormControlFile1">Please select file in tgf format</label>
+                            <input type="file" class="form-control-file" id="exampleFormControlFile1" name="file">
+                          </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <button type="submit" class="btn btn-primary" id="submit">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAddArgument" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalAddArgumentLabel">Add argument</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <form id="modalAddArgumentForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                          <div class="form-group">
+                            <label for="addArgumentValue">Please enter the name of the argument</label>
+                            <input class="form-control" type="text" placeholder="Argument name" id="addArgumentValue">
+
+                          </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <button type="submit" class="btn btn-primary" id="submitAddArgument" name="arg">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAddAttack" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalAddAttackLabel">Add attack</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <form id="modalAddAttackForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                          <div class="form-group">
+                            <label for="addAttacker">Please enter the name of the attacker</label>
+                            <input class="form-control" type="text" placeholder="Attacker" id="addAttacker">
+                            <label for="addAttacked">Please enter the name of the argument being attacked</label>
+                            <input class="form-control" type="text" placeholder="Attacked" id="addAttacked">
+
+                          </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <button type="submit" class="btn btn-primary" id="submitAddAttack" name="arg">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>

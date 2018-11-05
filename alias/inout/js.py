@@ -5,12 +5,12 @@ class JsEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, al.ArgumentationFramework):
             arglist = []
-            for arg in o.framework.values():
-                arglist.append({"name" : arg.name, "attacks" : list(arg.attacksref)})
+            for arg in o.arguments.values():
+                arglist.append({"name" : arg.name, "attacks" : list(arg.attacking)})
             encoded = {"name" : o.name, "arguments": arglist}
             return encoded
         if isinstance(o, al.Argument):
-            encoded = {"name" : o.name, "attacks" : list(o.attacksref)}
+            encoded = {"name" : o.name, "attacks" : list(o.attacking)}
             return encoded
         return json.JSONEncoder.default(self, o)
 
@@ -21,6 +21,8 @@ def write_json(obj, path=None):
     else:
         print(json.dump(obj, cls=JsEncoder, sort_keys=False, indent=4, separators=(',', ': ')))
 
+def get_json(obj):
+    return json.dumps(obj, cls=JsEncoder, sort_keys=False, indent=4, separators=(',', ': '))
 
 def read_json(path):
     f = open(path, 'r')
