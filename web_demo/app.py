@@ -39,8 +39,8 @@ def upload_file():
     if request.method == 'POST':
         file = request.files['file']
         global af
-        file.save(os.path.join("./", file.filename))
-        af = alias.read_tgf("./" + file.filename)
+        file.save(os.path.join("./upload/", file.filename))
+        af = alias.read_tgf("./upload/" + file.filename)
         return alias.get_json(af)
 
 @app.route('/addArgument/<arg>', methods=['GET'])
