@@ -6,8 +6,31 @@ $(function(){
     enableExtensions();
     $('#submit').on('click', function(e){
         e.preventDefault();
+        $('#sol_title').text('Solution:)
+        $('.sol_list').empty();
         uploadFile();
     });
+
+    $('#submitAddArgument').on('click', function(e){
+        e.preventDefault();
+        $('#sol_title').text('Solution:)
+        $('.sol_list').empty();
+        addArgument();
+    });
+
+    $('#submitAddAttack').on('click', function (e) {
+        e.preventDefault();
+        $('#sol_title').text('Solution:)
+        $('.sol_list').empty();
+        addAttack();
+    })
+
+    $('#newFramework').on('click', function (e) {
+        e.preventDefault();
+        $('#sol_title').text('Solution:)
+        $('.sol_list').empty();
+        createNewFramework();
+    })
 });
 
 var is_framework = false;
@@ -127,6 +150,7 @@ function setupExtensions()
     });
 
     $('#extensions a').click(function () {
+        cy.$('.node_sol').removeClass('node_sol');
         selected_extension = this.id;
         $.post('/extension/' + this.id, function (data) {
             var jsonReturn = $.parseJSON(data);
@@ -185,6 +209,40 @@ function uploadFile()
         dataType: 'json'
     }).done(function(data, textStatus, jqXHR){
         $('#myModal').modal('toggle');
+        renderFramework(data);
+    });
+}
+
+function addArgument()
+{
+    $.ajax({
+        type: 'GET',
+        url: '/addArgument/' + $('#addArgumentValue').val(),
+        dataType: 'json'
+    }).done(function(data, textStatus, jqXHR){
+        $('#modalAddArgument').modal('toggle');
+        renderFramework(data);
+    });
+}
+
+function addAttack()
+{
+    $.ajax({
+        type: 'GET',
+        url: '/addAttack/' + $('#addAttacker').val() + '/' + $('#addAttacked').val(),
+        dataType: 'json'
+    }).done(function(data, textStatus, jqXHR){
+        $('#modalAddAttack').modal('toggle');
+        renderFramework(data);
+    });
+}
+
+function createNewFramework() {
+    $.ajax({
+        type: 'GET',
+        url: '/newFramework'
+    }).done(function(data){
+        console.log(data)
         renderFramework(data);
     });
 }

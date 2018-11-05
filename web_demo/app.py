@@ -43,6 +43,28 @@ def upload_file():
         af = alias.read_tgf("./" + file.filename)
         return alias.get_json(af)
 
+@app.route('/addArgument/<arg>', methods=['GET'])
+def add_argument(arg):
+    global af
+    if af is None:
+        af = alias.ArgumentationFramework('Test')
+    af.add_argument(arg)
+    return alias.get_json(af)
+
+@app.route('/addAttack/<attacker>/<attacked>', methods=['GET'])
+def add_attack(attacker, attacked):
+    global af
+    if af is None:
+        af = alias.ArgumentationFramework('Test')
+    af.add_attack((attacker, attacked))
+    return alias.get_json(af)
+
+@app.route('/newFramework', methods=['GET'])
+def new_framework():
+    global af
+    af = alias.ArgumentationFramework('Test')
+    return alias.get_json(af)
+
 if __name__ == '__main__':
     app.run()
 
