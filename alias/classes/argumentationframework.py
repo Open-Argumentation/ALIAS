@@ -1,14 +1,13 @@
 import pycosat
 from collections import OrderedDict, defaultdict, Counter
+from enum import Enum
 from operator import itemgetter
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy
-import scipy
 
 from alias.classes import Matrix, Argument
-
 
 
 class ArgumentationFramework(object):
@@ -117,6 +116,11 @@ class ArgumentationFramework(object):
                 result.add(frozenset(x))
         return result
 
+    def get_some_stable_extension(self):
+        for x in self.get_conflict_free_sets():
+            if self.__is_stable_extension(x):
+                return x
+
     def __is_stable_extension(self, args):
         """
         Verifies if the provided argument(s) are stable extension using matrix
@@ -134,6 +138,11 @@ class ArgumentationFramework(object):
             if self.__is_complete_extension(x):
                 result.add(frozenset(x))
         return result
+
+    def get_some_complete_extension(self):
+        for x in self.get_conflict_free_sets():
+            if self.__is_complete_extension(x):
+                return x
 
     def __is_complete_extension(self, args):
         my_result = False
@@ -181,6 +190,11 @@ class ArgumentationFramework(object):
                 result.add(frozenset(x))
         return result
 
+    def get_some_preferred_extensions(self):
+        for x in self.get_conflict_free_sets():
+            if self.__is_preferred_extension(x):
+                return x
+
 
     def __is_preferred_extension(self, args):
         """
@@ -201,6 +215,33 @@ class ArgumentationFramework(object):
                         return False
             return True
         return False
+
+    def is_credulously_accepted(self, extension, arg):
+        for x in self.get_conflict_free_sets():
+            if extension.lower() == 'complete':
+                if self.__is_complete_extension(x) and arg in x:
+                    return True
+            if extension.lower() == 'preferred':
+                if self.__is_preferred_extension(x) and arg in x:
+                    return True
+            if extension.lower() == 'stable':
+                if self.__is_stable_extension(x) and arg in x:
+                    return True
+        return False
+
+    def is_skeptically_accepted(self, extension, arg):
+        for x in self.get_conflict_free_sets():
+            if extension.lower() == 'complete':
+                if self.__is_complete_extension(x) and arg not in x:
+                    return False
+            if extension.lower() == 'preferred':
+                if self.__is_preferred_extension(x) and arg not in x:
+                    return False
+            if extension.lower() == 'stable':
+                if self.__is_stable_extension(x) and arg not in x:
+                    return False
+        return True
+
 
     def __get_attacks_of_set(self, arg_set):
         """
