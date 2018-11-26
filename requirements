@@ -1,0 +1,10 @@
+parameterized
+matplotlib
+scipy
+numpy
+pycosat
+flask
+pyparsing
+networkx
+sqlalchemy
+py2neo
