@@ -1,6 +1,5 @@
 import pycosat
 from collections import OrderedDict, defaultdict, Counter
-from enum import Enum
 from operator import itemgetter
 
 import matplotlib.pyplot as plt

@@ -12,15 +12,15 @@ setup(
     license='GNU',
     url='https://github.com/alias-org/alias.git',
     author_email='roberto@robertolagreca.com',
-    version='0.1',
+    version='0.2',
     classifiers=[
         'Development Status :: 3 - Alpha'
         'Intended Audience :: Education',
         'Topic :: Scientific/Engineering',
         'License :: OSI Approved :: GNU General Public License (GPL)',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 3.6'
     ],
-    install_requires=['', 'tables', 'ortools', 'parameterized', 'matplotlib', 'scipy', 'numpy', 'pycosat', 'flask'],
+    install_requires=['tables', 'ortools', 'parameterized', 'matplotlib', 'scipy', 'numpy', 'pycosat', 'flask'],
     packages=find_packages(exclude=['docs', 'tests*']),
     extras_require={
         'inout': ['pyparsing', 'networkx'],
