@@ -8,10 +8,10 @@ except ImportError:
 setup(
     name='ALIAS',
     description='ALIAS',
-    author='Roberto La Greca',
+    author='Marcin Szczot, Roberto La Greca',
     license='GNU',
     url='https://github.com/alias-org/alias.git',
-    author_email='roberto@robertolagreca.com',
+    author_email='mszczot@gmail.com, roberto@robertolagreca.com',
     version='0.2',
     classifiers=[
         'Development Status :: 3 - Alpha'
@@ -20,11 +20,8 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python :: 3.6'
     ],
-    install_requires=['tables', 'ortools', 'parameterized', 'matplotlib', 'scipy', 'numpy', 'pycosat', 'flask'],
-    packages=find_packages(exclude=['docs', 'tests*']),
-    extras_require={
-        'inout': ['pyparsing', 'networkx'],
-        'db' : ['sqlalchemy', 'py2neo']
+    install_requires=['tables', 'ortools', 'parameterized', 'matplotlib', 'scipy', 'numpy', 'pycosat', 'flask', 'pyparsing', 'networkx', 'slqalchemy', 'py2neo'],
+    packages=find_packages(exclude=['docs', 'tests*'])
     },
     tests_require=['nose'],
 )
