@@ -1,7 +1,7 @@
 from unittest import TestCase
 from parameterized import parameterized
 from alias import *
-from Tests import TestHelper
+from tests import TestHelper
 
 
 class ArgumentationFrameworkTests(TestCase):
@@ -23,11 +23,11 @@ class ArgumentationFrameworkTests(TestCase):
         [stable_prefix + 'stable5.tgf', stable_prefix + 'stable5answer'],
         [stable_prefix + 'stable6.tgf', stable_prefix + 'stable6answer'],
     ])
-    def stable_extension_test(self, framework, solution):
+    def compute_stable_extensions(self, framework, solution):
         argumentation_framework = alias.read_tgf(framework)
         actual_stable = argumentation_framework.get_stable_extension()
         expected_stable = TestHelper.read_solution_from_file(solution)
-        TestHelper.assertListsEqual(expected_stable, actual_stable)
+        TestHelper.assert_lists_equal(expected_stable, actual_stable)
 
     @parameterized.expand([
         [complete_prefix + 'complete1.tgf', complete_prefix + 'complete1answer'],
@@ -37,11 +37,11 @@ class ArgumentationFrameworkTests(TestCase):
         [complete_prefix + 'complete5.tgf', complete_prefix + 'complete5answer'],
         [complete_prefix + 'complete6.tgf', complete_prefix + 'complete6answer'],
     ])
-    def complete_extension_test(self, framework, solution):
+    def compute_all_complete_extensions(self, framework, solution):
         argumentation_framework = alias.read_tgf(framework)
         actual_complete = argumentation_framework.get_complete_extension()
         expected_complete = TestHelper.read_solution_from_file(solution)
-        TestHelper.assertListsEqual(expected_complete, actual_complete)
+        TestHelper.assert_lists_equal(expected_complete, actual_complete)
 
     @parameterized.expand([
         [preferred_prefix + 'preferred1.tgf', preferred_prefix + 'preferred1answer'],
@@ -51,8 +51,8 @@ class ArgumentationFrameworkTests(TestCase):
         [preferred_prefix + 'preferred5.tgf', preferred_prefix + 'preferred5answer'],
         [preferred_prefix + 'preferred6.tgf', preferred_prefix + 'preferred6answer'],
     ])
-    def preferred_extension_test(self, framework, solution):
+    def compute_all_preferred_extensions(self, framework, solution):
         argumentation_framework = alias.read_tgf(framework)
         actual_preferred = argumentation_framework.get_preferred_extension()
         expected_preferred = TestHelper.read_solution_from_file(solution)
-        TestHelper.assertListsEqual(expected_preferred, actual_preferred)
+        TestHelper.assert_lists_equal(expected_preferred, actual_preferred)

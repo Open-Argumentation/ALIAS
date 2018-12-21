@@ -5,7 +5,7 @@ class TestHelper(object):
         return set(frozenset(line.split()) for line in open(file))
 
     @staticmethod
-    def assertListsEqual(expected, actual):
+    def assert_lists_equal(expected, actual):
         equal = True
         for x in expected:
             if x not in actual:

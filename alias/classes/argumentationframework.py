@@ -194,7 +194,6 @@ class ArgumentationFramework(object):
             if self.__is_preferred_extension(x):
                 return x
 
-
     def __is_preferred_extension(self, args):
         """
         Method to check if the given set is a preferred extension, based on the properties of the matrix
@@ -240,7 +239,6 @@ class ArgumentationFramework(object):
                 if self.__is_stable_extension(x) and arg not in x:
                     return False
         return True
-
 
     def __get_attacks_of_set(self, arg_set):
         """
