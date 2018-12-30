@@ -1,12 +1,12 @@
-import pycosat
-from collections import OrderedDict, defaultdict, Counter
-from operator import itemgetter
-
+from collections import OrderedDict, defaultdict
 import matplotlib.pyplot as plt
 import networkx as nx
-import numpy
 
-from alias.classes import Matrix, Argument
+from alias.classes.solvers import ExtensionType
+from alias.classes.matrix import Matrix
+from alias.classes.argument import Argument
+from alias.classes.semantics.extensionManager import ExtensionManager
+from alias.classes.solvers.solverManager import SolverManager
 
 
 class ArgumentationFramework(object):
@@ -17,13 +17,12 @@ class ArgumentationFramework(object):
         self.mapping = {}
         self.attacks = []  # collection of all attacks in the framework
         self._matrix = None  # matrix representation of the framework
-        self._args_to_defence_sets = defaultdict(list)
-        self.attack_clauses = []
+        self.__extensionManager = ExtensionManager()
+        self.__solverManager = SolverManager()
 
     @property
     def matrix(self):
-        if self._matrix is None:
-            self._matrix = Matrix(self.arguments, self.attacks)
+        self._matrix = Matrix(self.arguments, self.attacks)
         return self._matrix
 
     def __str__(self):
@@ -55,6 +54,7 @@ class ArgumentationFramework(object):
             counter = len(self.arguments)
             self.arguments[arg] = Argument(arg, counter, counter+1)
             self.mapping[counter+1] = arg
+        self.__solverManager.dirty = True
 
     def get_args_count(self):
         return len(self.arguments)
@@ -78,12 +78,9 @@ class ArgumentationFramework(object):
         self.attacks.append((attacker, attacked))
         self.arguments[attacker].attacking.append(attacked)
         self.arguments[attacked].attacked_by.append(attacker)
-        # check if the reverse clause is not already present
-        if (-self.arguments[attacked].clause_mapping, -self.arguments[attacker].clause_mapping) not in self.attack_clauses:
-            self.attack_clauses.append((-self.arguments[attacker].clause_mapping, -self.arguments[attacked].clause_mapping))
-        # self._store.add_attack((attacker, attacked))
+        self.__solverManager.dirty = True
 
-    def get_graph(self):
+    def __get_graph(self):
         graph = nx.DiGraph()
         for n in self.arguments.keys():
             graph.add_node(n)
@@ -96,7 +93,7 @@ class ArgumentationFramework(object):
         Method to draw directed graph of the argumentation framework
         :return:
         """
-        graph = self.get_graph()
+        graph = self.__get_graph()
         pos = nx.spring_layout(graph, k=0.30, iterations=20)
         nx.draw_networkx_nodes(graph, pos)
         nx.draw_networkx_labels(graph, pos)
@@ -104,225 +101,25 @@ class ArgumentationFramework(object):
         plt.show()
 
     def get_stable_extension(self):
-        """
-        Method to test if can get stable extensions only from the list of rows/columns in matrix where value is 0
-        :return:
-        """
-        result = set()
-        conflict_free = self.get_conflict_free_sets()
-        for x in conflict_free:
-            if self.__is_stable_extension(x):
-                result.add(frozenset(x))
-        return result
+        return self.__solverManager.get_extension(ExtensionType.STABLE, self.arguments, self.attacks, self.matrix)
 
     def get_some_stable_extension(self):
-        for x in self.get_conflict_free_sets():
-            if self.__is_stable_extension(x):
-                return x
-
-    def __is_stable_extension(self, args):
-        """
-        Verifies if the provided argument(s) are stable extension using matrix
-        :param args: list of arguments to be checked
-        :return: True if the provided arguments are a stable extension, otherwise False
-        """
-        if set(self.__get_attacks_of_set(args)) == (set(self.arguments).symmetric_difference(set(args))):
-            return True
-        return False
+        return self.__solverManager.get_some_extension(ExtensionType.STABLE, self.arguments, self.attacks, self.matrix)
     
     def get_complete_extension(self):
-        result = set()
-        conflict_free = self.get_conflict_free_sets()
-        for x in conflict_free:
-            if self.__is_complete_extension(x):
-                result.add(frozenset(x))
-        return result
+        return self.__solverManager.get_extension(ExtensionType.COMPLETE, self.arguments, self.attacks, self.matrix)
 
     def get_some_complete_extension(self):
-        for x in self.get_conflict_free_sets():
-            if self.__is_complete_extension(x):
-                return x
-
-    def __is_complete_extension(self, args):
-        my_result = False
-        if args:
-            args_to_check = [self.arguments[x].mapping for x in set(self.arguments.keys()) - set(args)]
-            args_mappings = [self.arguments[x].mapping for x in args]
-            my_column_vertices = self.matrix.get_sub_matrix(args_mappings, args_to_check)
-            my_row_vertices = self.matrix.get_sub_matrix(args_to_check, args_to_check)
-
-            my_sum_column_vertices = my_column_vertices.sum(axis=0).tolist()
-            my_sum_row_vertices = my_row_vertices.sum(axis=0).tolist()
-
-            subblock = []
-            counter = 0
-            for v in zip(my_sum_row_vertices[0], my_sum_column_vertices[0]):
-                if v[1] == 0:
-                    subblock.append(counter)
-                    if v[0] < 1:
-                        return False
-                counter += 1
-
-
-            test = numpy.where(my_row_vertices == 1)
-            counter = 0
-
-            check = {}
-            for v in test[0]:
-                if test[1][counter] in subblock and  my_sum_column_vertices[0][v] != 0 and test[1][counter] not in check:
-                    check[test[1][counter]] = False
-                else:
-                    check[test[1][counter]] = True
-                counter += 1
-            my_result = False if False in check.values() else True
-        return my_result
+        return self.__solverManager.get_some_extension(ExtensionType.COMPLETE, self.arguments, self.attacks, self.matrix)
 
     def get_preferred_extension(self):
-        """
-        Method to geterate complete extension for the argumentation framework
-        :return: list of sets of complete extension
-        """
-        result = set()
-        conflict_free = self.get_conflict_free_sets()
-        for x in conflict_free:
-            if self.__is_preferred_extension(x):
-                result.add(frozenset(x))
-        return result
+        return self.__solverManager.get_extension(ExtensionType.PREFERRED, self.arguments, self.attacks, self.matrix)
 
     def get_some_preferred_extensions(self):
-        for x in self.get_conflict_free_sets():
-            if self.__is_preferred_extension(x):
-                return x
+        return self.__solverManager.get_some_extension(ExtensionType.PREFERRED, self.arguments, self.attacks, self.matrix)
 
-    def __is_preferred_extension(self, args):
-        """
-        Method to check if the given set is a preferred extension, based on the properties of the matrix
-        :param args: list of arguments to be checked
-        :return: True if set is a preferred extension
-        """
-        if args:
-            args_to_check = set(self.arguments.keys()) - set(args) - set(self.__get_attacks_of_set(args))
-            arguments_to_check = [self.arguments[x].mapping for x in args_to_check]
-            if not arguments_to_check:
-                return True
-            else:
-                my_column_vertices = self.matrix.get_sub_matrix(arguments_to_check, arguments_to_check)
-                sum_of_vertices = my_column_vertices.sum(axis=0).tolist()[0]
-                for v in sum_of_vertices:
-                    if v == 0:
-                        return False
-            return True
-        return False
+    def is_credulously_accepted(self, extension: ExtensionType, argument):
+        return self.__solverManager.is_credulously_accepted(extension, self.arguments, self.attacks, argument, self.matrix)
 
-    def is_credulously_accepted(self, extension, arg):
-        for x in self.get_conflict_free_sets():
-            if extension.lower() == 'complete':
-                if self.__is_complete_extension(x) and arg in x:
-                    return True
-            if extension.lower() == 'preferred':
-                if self.__is_preferred_extension(x) and arg in x:
-                    return True
-            if extension.lower() == 'stable':
-                if self.__is_stable_extension(x) and arg in x:
-                    return True
-        return False
-
-    def is_skeptically_accepted(self, extension, arg):
-        for x in self.get_conflict_free_sets():
-            if extension.lower() == 'complete':
-                if self.__is_complete_extension(x) and arg not in x:
-                    return False
-            if extension.lower() == 'preferred':
-                if self.__is_preferred_extension(x) and arg not in x:
-                    return False
-            if extension.lower() == 'stable':
-                if self.__is_stable_extension(x) and arg not in x:
-                    return False
-        return True
-
-    def __get_attacks_of_set(self, arg_set):
-        """
-        Generates the list of all attacks of the given set
-        :param arg_set:
-        :return:
-        """
-        my_return = []
-        for arg in arg_set:
-            my_return += self.arguments[arg].attacking
-        return my_return
-
-    def __get_clauses_for_no_attacks(self):
-        my_return = []
-        for k, arg in self.arguments.items():
-            if len(arg.attacking) ==0 and len(arg.attacked_by) == 0:
-                my_return.append((arg.clause_mapping,))
-        return my_return
-
-    def get_conflict_free_sets(self):
-        self.attack_clauses.sort(key=itemgetter(0,1), reverse=True)
-        self.attacks.sort(key=itemgetter(0,1), reverse=False)
-        all_clauses = self.__get_admissible_cnf()
-        all_clauses = self.__remove_duplicate_clauses(all_clauses)
-        for clause in all_clauses:
-            for solution in pycosat.itersolve(clause):
-                mapped_sol = []
-                for value in solution:
-                    if value > 0:
-                        mapped_sol.append(self.mapping[value])
-                yield mapped_sol
-
-    def __remove_duplicate_clauses(self, all_clauses):
-        c = Counter(map(tuple, all_clauses))
-        duplicates = [(k, v) for k, v in c.items() if v > 1]
-        for duplicate in duplicates:
-            for _ in range(duplicate[1] - 1):
-                all_clauses.remove(list(duplicate[0]))
-        return all_clauses
-
-    def __get_admissible_cnf(self):
-        all_clauses = []
-        no_attacks = self.__get_clauses_for_no_attacks()
-
-        def to_cnf(value):
-            clauses = []
-            name = self.mapping[value]
-            clauses.append((value,))
-
-            self.__get_next_defence_arg(name, clauses, [])
-            # if len(self.arguments[name].attacking) == 0 and len(self.arguments[name].attacked_by) == 0:
-            clauses = clauses + self.attack_clauses + no_attacks
-            if len(clauses) > 0:
-                all_clauses.append(clauses)
-
-        for k in self.arguments:
-            to_cnf(self.arguments[k].clause_mapping)
-
-        return all_clauses
-
-    def __get_next_defence_arg(self, name, clauses, pathx=[]):
-        path = pathx
-        if name in path:
-            return
-        path.append(name)
-        if self.arguments[name].attacking:
-            # clauses.append((self.arguments[name].clause_mapping,))
-            for att in self.arguments[name].attacking:
-                # if att in path:
-                #     return
-                path_att = path.copy()
-                path_att.append(att)
-                if (-self.arguments[att].clause_mapping,) not in clauses:
-                    clauses.append((-self.arguments[att].clause_mapping,))
-                if self.arguments[att].attacking:
-                    for next_att in self.arguments[att].attacking:
-                        if next_att not in path and\
-                                next_att != name and next_att not in self.arguments[name].attacking and \
-                                (-self.arguments[name].clause_mapping, self.arguments[next_att].clause_mapping) not in clauses and \
-                                (-self.arguments[next_att].clause_mapping, self.arguments[name].clause_mapping) not in clauses:
-                            t = (self.arguments[name].clause_mapping, -self.arguments[next_att].clause_mapping)
-                            clauses.append(t)
-                            path_def = path_att.copy()
-                            path_def.append(next_att)
-                            self.__get_next_defence_arg(next_att, clauses, path_def.copy())
-        else:
-            return
+    def is_skeptically_accepted(self, extension: ExtensionType, argument):
+        return self.__solverManager.is_skeptically_accepted(extension, self.arguments, self.attacks, argument, self.matrix)

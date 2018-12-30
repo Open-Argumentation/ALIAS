@@ -13,3 +13,8 @@ class Argument(object):
     def add_attacker(self, attacker):
         self.attacked_by.append(attacker)
 
+    def is_attacked(self):
+        return len(self.attacked_by) > 0
+
+    def is_attacking(self):
+        return len(self.attacking) > 0

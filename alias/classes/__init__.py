@@ -1,3 +1,2 @@
-from .argument import *
-from .matrix import *
-from .argumentationframework import *
+from alias.classes.solvers import ExtensionType
+from alias.classes.argumentationframework import ArgumentationFramework
