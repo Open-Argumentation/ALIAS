@@ -20,7 +20,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python :: 3.6'
     ],
-    install_requires=['tables', 'ortools', 'parameterized', 'matplotlib', 'scipy', 'numpy', 'pycosat', 'flask', 'pyparsing', 'networkx', 'sqlalchemy', 'py2neo'],
+    install_requires=['tables', 'ortools', 'parameterized', 'matplotlib', 'scipy', 'numpy', 'pycosat', 'pyparsing', 'networkx', 'sqlalchemy', 'py2neo'],
     packages=find_packages(exclude=['docs', 'tests*']),
     tests_require=['nose'],
 )
