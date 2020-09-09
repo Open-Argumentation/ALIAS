@@ -1,5 +1,8 @@
 # ALIAS 0.1
 
+**ALIAS should be considered pre-alpha softeware at present. It's an indicator of the direction we're heading in. Some things work nicely. Others occasionally break, for example, the SAT solver doesn't necessarily find all solutions.**
+
+
 * [About](#about)
 
 * [Installation](#installation)
