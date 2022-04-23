@@ -44,6 +44,15 @@ class ArgumentationFramework(object):
             my_string += '|\n'
         return my_string
 
+    def __contains__(self, arg):
+        return arg in self.arguments
+
+    def __iter__(self):
+        return iter(self.arguments)
+
+    def __getitem__(self, arg):
+        return self.arguments[arg]
+
     def add_argument(self, arg):
         """
         Method to add argument to argumentation framework
@@ -80,6 +89,11 @@ class ArgumentationFramework(object):
         self.arguments[attacked].attacked_by.append(attacker)
         self.__solverManager.dirty = True
 
+    def get_attackers(self, argument):
+        assert self.__contains__(argument)
+        argument: Argument = self.arguments[argument]
+        return argument.attacked_by
+
     def __get_graph(self):
         graph = nx.DiGraph()
         for n in self.arguments.keys():
@@ -105,7 +119,7 @@ class ArgumentationFramework(object):
 
     def get_some_stable_extension(self):
         return self.__solverManager.get_some_extension(ExtensionType.STABLE, self.arguments, self.attacks, self.matrix)
-    
+
     def get_complete_extension(self):
         return self.__solverManager.get_extension(ExtensionType.COMPLETE, self.arguments, self.attacks, self.matrix)
 
