@@ -7,6 +7,14 @@ class Argument(object):
         self.mapping = mapping
         self.clause_mapping = clause_mapping
 
+    def __str__(self):
+        string = 'Argument \'' + self.name + '\' : Attacking: ['
+        string = string + (', '.join(self.attacking))
+        string = string + '], Attacked by: ['
+        string = string + (', '.join(self.attacked_by))
+        string = string + ']'
+        return string
+
     def add_attack(self, attacked):
         self.attacking.append(attacked)
 
